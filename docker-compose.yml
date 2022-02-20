@@ -17,6 +17,8 @@ services:
       LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     working_dir: /usr/app
+    depends_on:
+      - cache
     logging:
       driver: 'json-file'
       options:
