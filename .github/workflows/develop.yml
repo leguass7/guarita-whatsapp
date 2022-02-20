@@ -21,8 +21,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      mariadb:
-        image: mariadb:latest
+      mysql:
+        image: mysql:8
         env:
           MYSQL_DATABASE: guarita-whatsapp
           MYSQL_USER: guarita-whatsapp
@@ -36,9 +36,9 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v2
 
-      - name: Verify MariaDB connection
+      - name: Verify MySQL connection
         env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
+          PORT: ${{ job.services.mysql.ports[3306] }}
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
             sleep 1
@@ -68,7 +68,7 @@ jobs:
           REDIS_PORT: 6379
           DB_TYPE: mysql
           DB_HOST: 127.0.0.1
-          DB_PORT: ${{job.services.mariadb.ports[3306]}}
+          DB_PORT: ${{job.services.mysql.ports[3306]}}
           DB_DATABASE: guarita-whatsapp
           DB_USERNAME: guarita-whatsapp
           DB_PASSWORD: password
