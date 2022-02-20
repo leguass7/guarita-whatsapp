@@ -1,7 +1,10 @@
+name: Test App
+
 on:
   push:
     branches:
       - develop
+      - main
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
@@ -22,7 +25,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       mysql:
-        image: mysql:8
+        image: mariadb:latest
         env:
           MYSQL_DATABASE: guarita-whatsapp
           MYSQL_USER: guarita-whatsapp
@@ -36,9 +39,9 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v2
 
-      - name: Verify MySQL connection
+      - name: Verify MariaDB connection
         env:
-          PORT: ${{ job.services.mysql.ports[3306] }}
+          PORT: ${{ job.services.mariadb.ports[3306] }}
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
             sleep 1
@@ -56,11 +59,6 @@ jobs:
       - name: 🚔 Test Lint
         run: yarn lint
 
-      # - name: Sleep for 10 seconds
-      #   uses: jakejarvis/wait-action@master
-      #   with:
-      #     time: '10s'
-
       - name: 🚀 Test App
         run: yarn test
         env:
@@ -68,12 +66,13 @@ jobs:
           REDIS_PORT: 6379
           DB_TYPE: mysql
           DB_HOST: 127.0.0.1
-          DB_PORT: ${{job.services.mysql.ports[3306]}}
+          DB_PORT: ${{job.services.mariadb.ports[3306]}}
           DB_DATABASE: guarita-whatsapp
           DB_USERNAME: guarita-whatsapp
           DB_PASSWORD: password
           MAXBOT_KEY: ${{secrets.MAXBOT_KEY}}
           WHATSAPP_TEST: ${{secrets.WHATSAPP_TEST}}
+          TEXT_MESSAGE_TEST: ${{github.event.number}}
 
       - name: 😬 Test Build
         run: yarn build

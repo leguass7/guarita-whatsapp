@@ -1,38 +1,18 @@
+name: Deploy SSH
+
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'volumes/**'
-      - '.env.example'
+  workflow_run:
+  workflows: [Test App]
+  types:
+    - completed
+  branches: 
+    - main
 
 jobs:
-  deploySSH:
+  deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: 🏗 Setup repo
-        uses: actions/checkout@v2
-
-      - name: 🏗 Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: yarn
-
-      - name: 📦 Install dependencies
-        run: yarn --frozen-lockfile --ignore-opcional
-
-      - name: 🚔 Test Lint
-        run: yarn lint
-
-      - name: 🚀 Test App
-        run: yarn test
-
-      - name: 😬 Test Build
-        run: yarn build
-      
       - name: 😬 Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
@@ -40,4 +20,48 @@ jobs:
           username: ${{secrets.SSH_USER}}
           key: ${{secrets.SSH_PRIVATE_KEY}}
           port: 22
-          script: cd ./guarita-whatsapp && bash deploy.sh
+          script: cd ./guarita-whatsapp && bash deploy.sh    
+      
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths-ignore:
+#       - 'docs/**'
+#       - '**/*.md'
+#       - 'volumes/**'
+#       - '.env.example'
+
+# jobs:
+#   deploySSH:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: 🏗 Setup repo
+#         uses: actions/checkout@v2
+
+#       - name: 🏗 Setup Node
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: 16.x
+#           cache: yarn
+
+#       - name: 📦 Install dependencies
+#         run: yarn --frozen-lockfile --ignore-opcional
+
+#       - name: 🚔 Test Lint
+#         run: yarn lint
+
+#       - name: 🚀 Test App
+#         run: yarn test
+
+#       - name: 😬 Test Build
+#         run: yarn build
+      
+#       - name: 😬 Executing remote ssh commands using ssh key
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{secrets.SSH_HOST}}
+#           username: ${{secrets.SSH_USER}}
+#           key: ${{secrets.SSH_PRIVATE_KEY}}
+#           port: 22
+#           script: cd ./guarita-whatsapp && bash deploy.sh
