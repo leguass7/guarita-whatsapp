@@ -51,7 +51,7 @@ volumes:
   redis_data:
     
 
-# networks:
-#   default:
-#     external:
-#       name: database
+networks:
+  default:
+    external:
+      name: database
