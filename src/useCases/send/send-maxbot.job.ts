@@ -1,9 +1,9 @@
 import { Job, JobOptions } from 'bull';
-import Maxbot, { ISendTextResult } from 'maxbotjs';
 
 import { MaxbotException } from '#/app/exceptions/MaxbotException';
 import type { IRegisterJob, JobService } from '#/services/JobService';
 import { logDev } from '#/services/logger';
+import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
 
 export type SendMaxbotPayload = {
   token: string;
@@ -33,7 +33,7 @@ export const sendMaxbotMessage: IRegisterJob<'SendMaxbotText'> = {
   async handle({ data }: QueuePayload) {
     const { token, to, text } = data;
 
-    const maxbot = new Maxbot({ token, timeout: queueTimetout });
+    const maxbot = new MaxbotService({ token, timeout: queueTimetout });
     const response = await maxbot.sendText({ whatsapp: to }, text);
 
     if (!Boolean(response?.status)) {
@@ -50,7 +50,7 @@ export const sendMaxbotImage: IRegisterJob<'SendMaxbotImage'> = {
     const { token, to, url } = data;
 
     logDev('enviando imagem', url);
-    const maxbot = new Maxbot({ token, timeout: queueTimetout });
+    const maxbot = new MaxbotService({ token, timeout: queueTimetout });
     const response = await maxbot.sendImage({ whatsapp: to }, url);
     logDev('response imagem', response);
 

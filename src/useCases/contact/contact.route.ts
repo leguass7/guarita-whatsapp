@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
-import { MaxbotService } from '../maxbot/maxbot.service';
+import { MaxbotService } from '#/services/maxbot.service';
+
 import { ContactController } from './contact.controller';
 import { ContactService } from './contact.service';
 import { postContactSchema, patchContactSchema } from './contact.validation';
