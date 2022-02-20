@@ -40,6 +40,4 @@ jobs:
         run: ssh-keyscan -H ${{secrets.SSH_HOST}} >> ~/.ssh/known_hosts
 
       - name: Start deploy
-        run: 
-          - ssh root@${{secrets.SSH_HOST}}
-          - bash deploy.sh
+        run: ssh root@${{secrets.SSH_HOST}} && bash deploy.sh
