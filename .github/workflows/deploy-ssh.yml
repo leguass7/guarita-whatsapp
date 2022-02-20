@@ -8,7 +8,7 @@ on:
       - 'volumes/**'
 
 jobs:
-  deploy:
+  deploySSH:
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Setup repo
