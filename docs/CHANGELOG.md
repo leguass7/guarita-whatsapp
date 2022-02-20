@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 1.0.1 (2022-02-20)
+
+
+### Features
+
+* first commit ([4e869da](https://github.com/leguass7/guarita-whatsapp/commit/4e869da8750ba0eed4f34904e46515f0ea2a4930))
+* **send:** adicionado envio de imagem ([67fe481](https://github.com/leguass7/guarita-whatsapp/commit/67fe48123d78afc2633b35f0d4ab57ab7e8d360a))
+
 ### 1.0.1 (2022-02-19)
 
 

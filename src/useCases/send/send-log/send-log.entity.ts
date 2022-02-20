@@ -3,7 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 
 @Entity('send-logs')
 export class SendLog {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Index()
   @Column({ length: 32 })

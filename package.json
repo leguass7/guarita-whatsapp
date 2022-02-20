@@ -1,6 +1,6 @@
 {
   "name": "guarita-whatsapp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Serviço para entrega de mensagem no whatsapp",
   "main": "dist/index.js",
   "license": "UNLICENSED",

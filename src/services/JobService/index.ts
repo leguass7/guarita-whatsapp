@@ -13,8 +13,8 @@ import { redisConfig } from '#/config/redis';
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
 
-export interface IRegisterJob {
-  key: string;
+export interface IRegisterJob<K = any> {
+  key: K;
   handle: (...args: any[]) => void;
   options?: JobOptions;
 }
@@ -68,12 +68,13 @@ export class JobService<K extends string = any, P = any> {
 
   public add(key: K, data: P, options: JobOptions = {}) {
     const queue = this.queues.find(queue => queue.name === key);
+    if (!queue) this.log(`Chave da fila não registrada '${key}'`, 'error');
     return queue && queue.bull.add(data, { ...queue?.options, ...options });
   }
 
   public process() {
     return this.queues.forEach(async queue => {
-      queue.bull.process(1, queue.handle);
+      queue.bull.process(2, queue.handle);
 
       const processFails = (job: Job, err: Error) => {
         const failedList = this.failedList.filter(f => f.key === queue.name);

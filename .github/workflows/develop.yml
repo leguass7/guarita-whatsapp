@@ -1,14 +1,14 @@
 on:
   push:
     branches:
-      - main
+      - develop
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
       - 'volumes/**'
 
 jobs:
-  deploySSH:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Setup repo
@@ -31,12 +31,3 @@ jobs:
 
       - name: 😬 Test Build
         run: yarn build
-      
-      - name: 😬 Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{secrets.SSH_HOST}}
-          username: ${{secrets.SSH_USER}}
-          key: ${{secrets.SSH_PRIVATE_KEY}}
-          port: 22
-          script: cd ./guarita-whatsapp && bash deploy.sh
