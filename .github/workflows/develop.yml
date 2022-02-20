@@ -29,7 +29,7 @@ jobs:
           MYSQL_PASSWORD: password
           MYSQL_ROOT_PASSWORD: rootpassword
         ports:
-          - 33306:3306
+          - 3306
         options: 
           --health-cmd="mysqladmin ping" 
           --health-interval 10s 
@@ -52,10 +52,10 @@ jobs:
       - name: 🚔 Test Lint
         run: yarn lint
 
-      - name: Sleep for 120 seconds
+      - name: Sleep for 10 seconds
         uses: jakejarvis/wait-action@master
         with:
-          time: '60s'
+          time: '10s'
 
       - name: 🚀 Test App
         run: yarn test
@@ -64,11 +64,10 @@ jobs:
           REDIS_PORT: 6379
           DB_TYPE: mysql
           DB_HOST: mysql
-          DB_PORT: 33306
+          DB_PORT: ${{job.services.mysql.ports[3306]}}
           DB_DATABASE: guarita-whatsapp
           DB_USERNAME: guarita-whatsapp
           DB_PASSWORD: password
-
 
       - name: 😬 Test Build
         run: yarn build
