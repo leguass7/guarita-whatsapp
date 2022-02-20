@@ -4,7 +4,7 @@ WORKDIR /usr/app
 
 COPY . .
 
-RUN yarn install --frozen-lockfile --ignore-engines --ignore-opcional
+RUN yarn install --frozen-lockfile --ignore-opcional
 
 RUN yarn build
 
