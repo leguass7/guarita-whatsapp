@@ -21,11 +21,11 @@ jobs:
       - name: 📦 Install dependencies
         run: yarn --frozen-lockfile --ignore-opcional
 
-      - name: 🚀 Test Lint
+      - name: 🚔 Test Lint
         run: yarn lint
 
       - name: 🚀 Test App
         run: yarn test
 
-      - name: 🚀 Test Build
+      - name: 😬 Test Build
         run: yarn build
