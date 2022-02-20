@@ -31,13 +31,13 @@ jobs:
         run: yarn build
       
       - name: executing remote ssh commands using ssh key
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{secrets.SSH_HOST}}
-        username: root
-        key: ${{SSH_PRIVATE_KEY}}
-        port: 22
-        script: cd ./guarita-whatsapp && bash deploy.sh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST}}
+          username: root
+          key: ${{SSH_PRIVATE_KEY}}
+          port: 22
+          script: cd ./guarita-whatsapp && bash deploy.sh
       # - name: Install SSH Key
       #   uses: shimataro/ssh-key-action@v2
       #   with:
