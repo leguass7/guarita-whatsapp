@@ -4,7 +4,7 @@ on:
       - develop
     paths-ignore:
       - 'docs/**'
-      - '**.md'
+      - '**/*.md'
       - 'volumes/**'
 
 jobs:
