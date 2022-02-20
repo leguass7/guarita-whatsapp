@@ -72,6 +72,8 @@ jobs:
           DB_DATABASE: guarita-whatsapp
           DB_USERNAME: guarita-whatsapp
           DB_PASSWORD: password
+          MAXBOT_KEY: ${{secrets.MAXBOT_KEY}}
+          WHATSAPP_TEST: ${{secrets.WHATSAPP_TEST}}
 
       - name: 😬 Test Build
         run: yarn build
