@@ -21,6 +21,9 @@
     "type": "git",
     "url": "https://github.com/leguass7/guarita-whatsapp.git"
   },
+  "resolutions": {
+    "glob-parent": "5.1.2"
+  },
   "devDependencies": {
     "@types/bull": "^3.15.8",
     "@types/cors": "^2.8.12",
