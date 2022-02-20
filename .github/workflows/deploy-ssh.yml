@@ -2,11 +2,11 @@ name: Deploy SSH
 
 on:
   workflow_run:
-  workflows: [Test App]
-  types:
-    - completed
-  branches: 
-    - main
+    workflows: [Test App]
+    types:
+      - completed
+    branches: 
+      - main
 
 jobs:
   deploy:
