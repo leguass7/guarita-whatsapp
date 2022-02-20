@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { MaxbotService } from '../maxbot/maxbot.service';
+import { MaxbotService } from '#/services/maxbot.service';
+
 import { ContactService } from './contact.service';
 
 export class ContactController {

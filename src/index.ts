@@ -5,7 +5,7 @@ import { logging } from './services/logger';
 
 const appExpress = new AppExpress({ port: httpPort, env: nodeEnv });
 
-async function startServer(): Promise<void> {
+export async function startServer() {
   const database = await createDatabase({
     ...dbConfig,
     synchronize: isDevMode,
@@ -15,8 +15,9 @@ async function startServer(): Promise<void> {
 
   if (database?.isConnected) {
     logging('DATABASE CONNECTED: ', dbConfig.host);
-    appExpress.listen();
+    return appExpress.listen();
   }
+  return null;
 }
 
-startServer();
+if (nodeEnv !== 'testing') startServer();

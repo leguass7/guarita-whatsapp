@@ -21,7 +21,7 @@ export interface IAppOptions {
 
 export class AppExpress {
   private readonly port: number;
-  private readonly express: Express;
+  public readonly express: Express;
   private readonly env: NodeEnv;
   private started: boolean;
 
@@ -48,21 +48,21 @@ export class AppExpress {
     this.express.use(errorMiddleware);
   }
 
-  private startQueues() {
-    queues.forEach(queue => queue?.process());
+  private async startQueues() {
+    return Promise.all(queues.map(queue => queue?.process()));
   }
 
-  start() {
+  async start() {
     this.middlewares();
     this.routes();
-    this.startQueues();
+    await this.startQueues();
     this.started = true;
     return this;
   }
 
-  listen() {
+  async listen() {
     try {
-      if (!this.started) this.start();
+      if (!this.started) await this.start();
       return this.express.listen(this.port, () => {
         logging(`STARTED SERVER development=${this.env}`, `PORT=${this.port}`);
       });

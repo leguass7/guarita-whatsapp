@@ -72,50 +72,53 @@ export class JobService<K extends string = any, P = any> {
     return queue && queue.bull.add(data, { ...queue?.options, ...options });
   }
 
-  public process() {
-    return this.queues.forEach(async queue => {
-      queue.bull.process(2, queue.handle);
+  public async process() {
+    return Promise.all(
+      this.queues.map(async queue => {
+        queue.bull.process(2, queue.handle);
 
-      const processFails = (job: Job, err: Error) => {
-        const failedList = this.failedList.filter(f => f.key === queue.name);
-        failedList.forEach(failedJob => {
-          try {
-            failedJob?.handler(job, err);
-            this.failedList = this.failedList.filter(f => f.uid !== failedJob.uid);
-          } catch (error) {
-            this.log(`failedList ${queue.name}:${job?.id} failed:${job?.failedReason}`);
+        const processFails = (job: Job, err: Error) => {
+          const failedList = this.failedList.filter(f => f.key === queue.name);
+          failedList.forEach(failedJob => {
+            try {
+              failedJob?.handler(job, err);
+              this.failedList = this.failedList.filter(f => f.uid !== failedJob.uid);
+            } catch (error) {
+              this.log(`failedList ${queue.name}:${job?.id} failed:${job?.failedReason}`);
+            }
+          });
+        };
+
+        const processSuccess = (job: Job, result: any) => {
+          const successList = this.successList.filter(f => f.key === queue.name);
+          successList.forEach(successJob => {
+            try {
+              successJob?.handler(job, result);
+              this.successList = this.successList.filter(f => f.uid !== successJob.uid);
+            } catch (error) {
+              this.log(
+                `successList ${queue.name}:${job?.id} error:${job?.failedReason || error?.message}`,
+              );
+            }
+          });
+        };
+
+        queue.bull.on('failed', (job, err) => {
+          const attempts = Number(job.opts?.attempts) || 0;
+          const attemptsMade = Number(job?.attemptsMade) || 0;
+          if (attemptsMade >= attempts) {
+            this.log(`${queue.name}:${job?.id} failed:${job?.failedReason}`);
+            processFails(job, err);
+          } else {
+            this.log(`${queue.name}:${job?.id} trying:${attemptsMade}`, 'info');
           }
         });
-      };
 
-      const processSuccess = (job: Job, result: any) => {
-        const successList = this.successList.filter(f => f.key === queue.name);
-        successList.forEach(successJob => {
-          try {
-            successJob?.handler(job, result);
-            this.successList = this.successList.filter(f => f.uid !== successJob.uid);
-          } catch (error) {
-            this.log(
-              `successList ${queue.name}:${job?.id} error:${job?.failedReason || error?.message}`,
-            );
-          }
+        queue.bull.on('completed', (job, result) => {
+          processSuccess(job, result);
         });
-      };
-
-      queue.bull.on('failed', (job, err) => {
-        const attempts = Number(job.opts?.attempts) || 0;
-        const attemptsMade = Number(job?.attemptsMade) || 0;
-        if (attemptsMade >= attempts) {
-          this.log(`${queue.name}:${job?.id} failed:${job?.failedReason}`);
-          processFails(job, err);
-        } else {
-          this.log(`${queue.name}:${job?.id} trying:${attemptsMade}`, 'info');
-        }
-      });
-
-      queue.bull.on('completed', (job, result) => {
-        processSuccess(job, result);
-      });
-    });
+        return true;
+      }),
+    );
   }
 }

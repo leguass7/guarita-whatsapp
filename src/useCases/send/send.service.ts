@@ -46,7 +46,7 @@ export class SendService {
     const { token, to, text } = payload;
     const save = { type: 'maxbot', to, payload };
     const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
-    const job = this.maxbotJob
+    const job = await this.maxbotJob
       .onFailed('SendMaxbotText', this.processFailed(save))
       .onSuccess('SendMaxbotText', this.processSuccess(save, log))
       .add('SendMaxbotText', { token, to, text });
@@ -59,7 +59,7 @@ export class SendService {
 
     const save = { type: 'maxbot', to, payload };
     const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
-    const job = this.maxbotJob
+    const job = await this.maxbotJob
       .onFailed('SendMaxbotImage', this.processFailed(save))
       .onSuccess('SendMaxbotImage', this.processSuccess(save, log))
       .add('SendMaxbotImage', { token, to, url });

@@ -2,6 +2,9 @@ import 'dotenv/config';
 import { resolve } from 'path';
 
 export const env = {
+  MAXBOT_KEY: process.env.MAXBOT_KEY,
+  WHATSAPP_TEST: process.env.WHATSAPP_TEST,
+  //
   PORT: Number(process.env.PORT) || 3333,
   APP_SECRET: process.env.APP_SECRET,
   //
@@ -20,7 +23,7 @@ export const env = {
   //
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: Number(process.env?.REDIS_PORT) || 6379,
-  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_PASSWORD: process.env?.REDIS_PASSWORD || undefined,
 };
 
 export type NodeEnv = 'development' | 'production' | 'testing';
