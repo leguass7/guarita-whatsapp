@@ -1,5 +1,6 @@
 # guarita-whatsapp
-[![.github/workflows/deploy.yml](https://github.com/leguass7/guarita-whatsapp/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/leguass7/guarita-whatsapp/actions/workflows/deploy.yml)
+
+[![.github/workflows/deploy-ssh.yml](https://github.com/leguass7/guarita-whatsapp/actions/workflows/deploy-ssh.yml/badge.svg)](https://github.com/leguass7/guarita-whatsapp/actions/workflows/deploy-ssh.yml)
 
 Serviço para entrega de mensagem no whatsapp via [MAXBOT](https://mbr.maxbot.com.br/doc-api-v1.php)
 
