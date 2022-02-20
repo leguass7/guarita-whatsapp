@@ -4,6 +4,8 @@ on:
       - develop
     paths-ignore:
       - 'docs/**'
+      - '**.md'
+      - 'volumes/**'
 
 jobs:
   deploy:
