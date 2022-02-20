@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig-build.json && tscpaths -p tsconfig-build.json -s ./src -o ./dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only --ignore-watch node_modules --no-notify src/index.ts",
-    "test": "jest --coverage",
+    "test:jest": "jest --coverage",
+    "test": "echo 'not implemented'",
     "lint": "eslint ./src --ext js --ext ts --fix"
   },
   "standard-version": {
