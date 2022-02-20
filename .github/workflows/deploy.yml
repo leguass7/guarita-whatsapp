@@ -35,7 +35,7 @@ jobs:
         with:
           host: ${{secrets.SSH_HOST}}
           username: root
-          key: ${{SSH_PRIVATE_KEY}}
+          key: ${{secrets.SSH_PRIVATE_KEY}}
           port: 22
           script: cd ./guarita-whatsapp && bash deploy.sh
       # - name: Install SSH Key
