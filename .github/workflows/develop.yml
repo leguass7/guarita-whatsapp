@@ -53,9 +53,9 @@ jobs:
         run: yarn lint
 
       - name: Sleep for 120 seconds
-        uses: jakejarvis/wait-action@master
-          with:
-            time: '60s'
+         uses: jakejarvis/wait-action@master
+         with:
+           time: '60s'
 
       - name: 🚀 Test App
         run: yarn test
