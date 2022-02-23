@@ -22,9 +22,9 @@ export interface QueuePayload extends Job {
 const queueTimetout = 20000;
 export const defaultJobOptions: JobOptions = {
   delay: 10,
-  attempts: 2,
+  attempts: 3,
   timeout: queueTimetout - 1,
-  backoff: { type: 'fixed', delay: 60000 },
+  backoff: { type: 'exponential', delay: 60000 },
 };
 
 export const sendMaxbotMessage: IRegisterJob<'SendMaxbotText'> = {
