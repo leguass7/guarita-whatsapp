@@ -117,6 +117,7 @@ export class JobService<K extends string = any, P = any> {
         queue.bull.on('completed', (job, result) => {
           processSuccess(job, result);
         });
+
         return true;
       }),
     );

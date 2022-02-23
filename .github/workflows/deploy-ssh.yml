@@ -20,7 +20,11 @@ jobs:
           username: ${{secrets.SSH_USER}}
           key: ${{secrets.SSH_PRIVATE_KEY}}
           port: 22
-          script: cd ./guarita-whatsapp && bash deploy.sh    
+          script_stop: true
+          #script: cd ./guarita-whatsapp && bash deploy.sh    
+          script: | 
+            cd ./guarita-whatsapp 
+            bash deploy.sh    
       
 # on:
 #   push:
