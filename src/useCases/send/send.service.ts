@@ -31,6 +31,7 @@ export class SendService {
 
   private processSuccess(data: CreateSendLog, log?: LogCallback): CompletedEventCallback {
     return async (job: Job, { msgId, msg: message }: ISendTextResult) => {
+      // console.log('COMPLETADO', await job.isDelayed(), job.data);
       const created = await this.sendLogService.create({
         ...data,
         status: true,
@@ -38,14 +39,17 @@ export class SendService {
         messageId: msgId,
       });
       if (log && typeof log === 'function') log(created.id);
+
       return created;
     };
   }
 
   async sendMaxbotText(payload: SendMaxbotPayload) {
     const { token, to, text } = payload;
+
     const save = { type: 'maxbot', to, payload };
     const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
+
     const job = await this.maxbotJob
       .onFailed('SendMaxbotText', this.processFailed(save))
       .onSuccess('SendMaxbotText', this.processSuccess(save, log))
@@ -59,6 +63,7 @@ export class SendService {
 
     const save = { type: 'maxbot', to, payload };
     const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
+
     const job = await this.maxbotJob
       .onFailed('SendMaxbotImage', this.processFailed(save))
       .onSuccess('SendMaxbotImage', this.processSuccess(save, log))

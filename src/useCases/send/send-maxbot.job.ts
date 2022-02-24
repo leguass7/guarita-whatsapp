@@ -1,4 +1,4 @@
-import { Job, JobOptions } from 'bull';
+import type { Job, JobOptions } from 'bull';
 
 import { MaxbotException } from '#/app/exceptions/MaxbotException';
 import type { IRegisterJob, JobService } from '#/services/JobService';
