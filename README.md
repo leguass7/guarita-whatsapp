@@ -19,3 +19,4 @@ Precisamos de um server responsável apenas por essas entregas.
    - https://hoohoo.top/blog/20210525232300-github-action-auto-ssh-to-host-and-excute-script/
    - https://zellwk.com/blog/github-actions-deploy/
    - https://firefart.at/post/using-mysql-service-with-github-actions/
+   - https://www.vultr.com/?ref=8956372-8H

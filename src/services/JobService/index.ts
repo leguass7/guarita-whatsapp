@@ -3,6 +3,7 @@ import Bull, {
   FailedEventCallback,
   Job,
   JobOptions,
+  ProcessCallbackFunction,
   Queue,
   QueueOptions,
 } from 'bull';
@@ -15,13 +16,15 @@ import { LogClass } from '../logger/log-decorator';
 
 export interface IRegisterJob<K = any> {
   key: K;
-  handle: (...args: any[]) => void;
+  // handle: (...args: any[]) => void;
+  handle: ProcessCallbackFunction<any>;
   options?: JobOptions;
 }
 
 interface IJob {
   name: string;
-  handle: (...args: any[]) => void;
+  // handle: (...args: any[]) => void;
+  handle: ProcessCallbackFunction<any>;
   options?: JobOptions;
   bull: Queue;
 }
@@ -52,6 +55,10 @@ export class JobService<K extends string = any, P = any> {
     return this;
   }
 
+  public getQueues() {
+    return this.queues;
+  }
+
   public log(message: string, type: 'error' | 'info' = 'error') {
     LoggerJobs[type](`JobService ${message}`);
   }
@@ -72,10 +79,10 @@ export class JobService<K extends string = any, P = any> {
     return queue && queue.bull.add(data, { ...queue?.options, ...options });
   }
 
-  public async process() {
+  public process() {
     return Promise.all(
-      this.queues.map(async queue => {
-        queue.bull.process(2, queue.handle);
+      this.queues.map(queue => {
+        queue.bull.process(queue.name, queue.handle);
 
         const processFails = (job: Job, err: Error) => {
           const failedList = this.failedList.filter(f => f.key === queue.name);
@@ -117,6 +124,7 @@ export class JobService<K extends string = any, P = any> {
         queue.bull.on('completed', (job, result) => {
           processSuccess(job, result);
         });
+
         return true;
       }),
     );

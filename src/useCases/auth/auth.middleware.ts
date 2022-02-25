@@ -16,6 +16,10 @@ export function requestHeaderToken(req: Request) {
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  // console.log('req', req.path);
+
+  // if (req.path === '/bull/monitor') return next();
+
   const token = requestHeaderToken(req);
 
   if (!token) {
