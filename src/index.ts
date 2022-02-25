@@ -8,7 +8,7 @@ const appExpress = new AppExpress({ port: httpPort, env: nodeEnv });
 export async function startServer() {
   const database = await createDatabase({
     ...dbConfig,
-    synchronize: false, //isDevMode,
+    synchronize: isDevMode,
     logging: ['error'],
     //logging: ['error', 'query'],
   });
