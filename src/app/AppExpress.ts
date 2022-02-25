@@ -49,7 +49,8 @@ export class AppExpress {
   }
 
   private async startQueues() {
-    return Promise.all(queues.map(queue => queue?.process()));
+    // return Promise.all(queues.map(queue => queue?.process()));
+    queues.map(queue => queue?.process());
   }
 
   async start() {

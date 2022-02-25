@@ -6,7 +6,7 @@ import { LogClass } from '#/services/logger/log-decorator';
 
 import { CreateSendLog } from './send-log/send-log.dto';
 import { SendLogService } from './send-log/send-log.service';
-import { SendMaxbotPayload, SendJobService } from './send-maxbot.job';
+import { SendMaxbotPayload, SendQueueService } from './send-maxbot.job';
 
 type LogCallback = (logId?: string | number) => void;
 
@@ -14,10 +14,11 @@ export type SendServiceJobScheluer = (payload: SendMaxbotPayload) => Promise<Job
 
 @LogClass
 export class SendService {
-  constructor(private maxbotJob: SendJobService, private sendLogService: SendLogService) {}
+  constructor(private maxbotJob: SendQueueService, private sendLogService: SendLogService) {}
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
     return async ({ failedReason: message = '' }: Job, { response = '' }: any) => {
+      // console.log('FALHADO', message);
       const created = await this.sendLogService.create({
         ...data,
         status: false,
@@ -48,7 +49,9 @@ export class SendService {
     const { token, to, text } = payload;
 
     const save = { type: 'maxbot', to, payload };
-    const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
+    const log: LogCallback = _logId => {
+      //logging('Mensagem enviada', to, logId)
+    };
 
     const job = await this.maxbotJob
       .onFailed('SendMaxbotText', this.processFailed(save))
