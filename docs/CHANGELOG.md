@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 1.0.2 (2022-02-25)
+
+
+### Features
+
+* adicionado rate limit ([fa476b6](https://github.com/leguass7/guarita-whatsapp/commit/fa476b603474abde7fcae0456c17dffcd349b088))
+* adicionado rate limit ([7b475d5](https://github.com/leguass7/guarita-whatsapp/commit/7b475d5a9de014f15cdaea70dad974893c494688))
+* first commit ([4e869da](https://github.com/leguass7/guarita-whatsapp/commit/4e869da8750ba0eed4f34904e46515f0ea2a4930))
+* **notWorking:** adicionado ratelinit DOWN ([bf4790a](https://github.com/leguass7/guarita-whatsapp/commit/bf4790a55ad849109b00f4ea377a23d34564996f))
+* **send:** adicionado envio de imagem ([67fe481](https://github.com/leguass7/guarita-whatsapp/commit/67fe48123d78afc2633b35f0d4ab57ab7e8d360a))
+
 ### 1.0.1 (2022-02-20)
 
 
