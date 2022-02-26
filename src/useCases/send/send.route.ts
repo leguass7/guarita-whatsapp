@@ -8,20 +8,18 @@ import { SendController } from './send.controller';
 import { SendService } from './send.service';
 import { postSendSchema } from './send.validation';
 
-const sendMaxbotJob = new QueueService('MAXBOT_QUEUE', [sendMaxbotMessage, sendMaxbotImage], {
-  defaultJobOptions,
-  limiter: {
-    max: 2,
-    duration: 1000,
-    // bounceBack: true,
-  },
-});
 const sendLogService = new SendLogService();
-const sendService = new SendService(sendMaxbotJob, sendLogService);
+
+const sendMaxbotQueue = new QueueService('MAXBOT_QUEUE', [sendMaxbotMessage, sendMaxbotImage], {
+  defaultJobOptions,
+  limiter: { max: 2, duration: 1000 },
+});
+
+const sendService = new SendService(sendMaxbotQueue, sendLogService);
 const controller = new SendController(sendService);
 
 const SendRoute = Router();
 
 SendRoute.post('/', postSendSchema, (req, res, next) => controller.sendMessage(req, res, next));
 
-export { SendRoute, sendService, sendMaxbotJob, sendLogService };
+export { SendRoute, sendService, sendLogService, sendMaxbotQueue };

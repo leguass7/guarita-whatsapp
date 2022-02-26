@@ -6,8 +6,8 @@ export class SendLog {
   id: string;
 
   @Index()
-  @Column({ length: 32 })
-  type: string;
+  @Column({ length: 32, nullable: true })
+  provider: string;
 
   @Index()
   @Column({ length: 64 })
@@ -16,6 +16,10 @@ export class SendLog {
   @Index()
   @Column({ nullable: false })
   status?: boolean;
+
+  @Index()
+  @Column({ length: 32, nullable: true })
+  type?: string;
 
   @Index()
   @Column({ nullable: true, length: 128 })

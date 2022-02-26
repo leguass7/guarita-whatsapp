@@ -12,6 +12,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { redisConfig } from '#/config/redis';
 
 import { LoggerJobs } from '../logger';
+import { LogClass } from '../logger/log-decorator';
 
 type Item<T = any> = {
   uid: string;
@@ -26,6 +27,7 @@ export interface IJob<K extends string = any, J = any> {
   options?: JobOptions;
 }
 
+@LogClass
 export class QueueService<K extends string = any, T = any> {
   private failedList: Item[];
   private successList: Item[];
