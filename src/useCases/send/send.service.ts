@@ -24,6 +24,7 @@ export class SendService {
         status: false,
         message,
         response,
+        createdAt: new Date(),
       });
       if (log && typeof log === 'function') log(created.id);
       return created;
@@ -38,6 +39,7 @@ export class SendService {
         status: true,
         message,
         messageId: msgId,
+        createdAt: new Date(),
       });
       if (log && typeof log === 'function') log(created.id);
 
@@ -48,7 +50,7 @@ export class SendService {
   async sendMaxbotText(payload: SendMaxbotPayload) {
     const { token, to, text } = payload;
 
-    const save = { type: 'maxbot', to, payload };
+    const save = { provider: 'maxbot', type: 'text', to, payload };
     const log: LogCallback = _logId => {
       //logging('Mensagem enviada', to, logId)
     };
@@ -64,7 +66,7 @@ export class SendService {
   async sendMaxbotImage(payload: SendMaxbotPayload) {
     const { token, to, url } = payload;
 
-    const save = { type: 'maxbot', to, payload };
+    const save = { provider: 'maxbot', type: 'image', to, payload };
     const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
 
     const job = await this.maxbotJob
