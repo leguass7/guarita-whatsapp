@@ -12,7 +12,7 @@ const sendLogService = new SendLogService();
 
 const sendMaxbotQueue = new QueueService('MAXBOT_QUEUE', [sendMaxbotMessage, sendMaxbotImage], {
   defaultJobOptions,
-  limiter: { max: 2, duration: 1000 },
+  limiter: { max: 3, duration: 1000 },
 });
 
 const sendService = new SendService(sendMaxbotQueue, sendLogService);

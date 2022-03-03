@@ -23,9 +23,9 @@ export interface QueuePayload extends Job {
 const queueTimetout = 30000;
 export const defaultJobOptions: JobOptions = {
   delay: 10,
-  attempts: 3,
+  attempts: 5,
   timeout: queueTimetout - 1,
-  backoff: { type: 'exponential', delay: 1000 },
+  backoff: { type: 'exponential', delay: 120000 },
 };
 
 export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
