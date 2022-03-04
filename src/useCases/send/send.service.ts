@@ -72,7 +72,7 @@ export class SendService {
     };
 
     const priority = this.getPriority(to);
-    console.log('priority', priority);
+
     const job = await this.maxbotJob
       .onFailed('SendMaxbotText', this.processFailed(save))
       .onSuccess('SendMaxbotText', this.processSuccess(save, log))
