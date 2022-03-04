@@ -27,8 +27,8 @@ export const defaultJobOptions: JobOptions = {
   timeout: queueTimetout - 1,
   backoff: {
     type: 'exponential',
-    delay: 1000,
-    // delay: 120000
+    // delay: 1000, // test dev
+    delay: 120000,
   },
 };
 
