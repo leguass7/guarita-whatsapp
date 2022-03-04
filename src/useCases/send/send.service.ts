@@ -1,6 +1,7 @@
 import type { CompletedEventCallback, FailedEventCallback, Job } from 'bull';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
+import { CacheService } from '#/services/ChacheService';
 import { logging } from '#/services/logger';
 import { LogClass } from '#/services/logger/log-decorator';
 
@@ -14,7 +15,22 @@ export type SendServiceJobScheluer = (payload: SendMaxbotPayload) => Promise<Job
 
 @LogClass
 export class SendService {
-  constructor(private maxbotJob: SendQueueService, private sendLogService: SendLogService) {}
+  constructor(
+    private maxbotJob: SendQueueService,
+    private sendLogService: SendLogService,
+    private cacheService: CacheService,
+  ) {}
+
+  public getPriority(to: string) {
+    const key = `to-${to}`;
+    let count = 1;
+    const has = this.cacheService.hasKey(key);
+    if (has) {
+      count = Number(this.cacheService.get<number>(key)) + 1;
+    }
+    this.cacheService.set(key, count, 6200);
+    return count;
+  }
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
     return async ({ failedReason: message = '' }: Job, { response = '' }: any) => {
@@ -55,10 +71,12 @@ export class SendService {
       //logging('Mensagem enviada', to, logId)
     };
 
+    const priority = this.getPriority(to);
+    console.log('priority', priority);
     const job = await this.maxbotJob
       .onFailed('SendMaxbotText', this.processFailed(save))
       .onSuccess('SendMaxbotText', this.processSuccess(save, log))
-      .add('SendMaxbotText', { token, to, text });
+      .add('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true });
 
     return job;
   }

@@ -12,6 +12,7 @@ const sendLogsQueue = new QueueService('SENDLOGS_QUEUE', [createSendLogJob(sendL
     timeout: 10000,
     backoff: { type: 'exponential', delay: 1000 },
   },
+  prefix: 'GUARITA_WHATSAPP',
   limiter: { max: 1, duration: 2000 },
 });
 sendLogsQueue.add('SendFailure', { teste: '' }, { repeat: { cron: '10 12 * * *' } });
