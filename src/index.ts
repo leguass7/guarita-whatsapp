@@ -9,8 +9,8 @@ export async function startServer() {
   const database = await createDatabase({
     ...dbConfig,
     synchronize: isDevMode,
-    // logging: ['error'],
-    logging: ['error', 'query'],
+    logging: ['error'],
+    // logging: ['error', 'query'],
   });
 
   if (database?.isConnected) {
