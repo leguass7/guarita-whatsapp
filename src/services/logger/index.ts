@@ -21,8 +21,8 @@ const daillyRotateOpts = {
   datePattern: 'YYYY-MM-DD',
   frequency: '1d',
   zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '15d',
+  maxSize: '2m',
+  maxFiles: '7d',
 };
 
 const jobsErrors: DailyRotateFile.DailyRotateFileTransportOptions = {
@@ -30,9 +30,10 @@ const jobsErrors: DailyRotateFile.DailyRotateFileTransportOptions = {
   datePattern: 'YYYY-MM-DD',
   dirname: join(pathVolume, 'logs'),
   filename: `${projectName}-${projectVersion}-JOBS.log`,
+  zippedArchive: true,
   frequency: '1d',
-  maxSize: '20m',
-  maxFiles: '15d',
+  maxSize: '2m',
+  maxFiles: '7d',
 };
 
 const levels = { error: 0, warn: 1, info: 2, http: 3, debug: 4 };

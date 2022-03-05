@@ -14,8 +14,11 @@ import { redisConfig } from '#/config/redis';
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
 
-type Item<T = any> = {
+type EventType = 'success' | 'failed' | 'trying';
+
+type EventItem<T = any> = {
   uid: string;
+  eventType: EventType;
   key: string;
   callback: FailedEventCallback<T> | CompletedEventCallback<T>;
 };
@@ -29,8 +32,7 @@ export interface IJob<K extends string = any, J = any> {
 
 @LogClass
 export class QueueService<K extends string = any, T = any> {
-  private failedList: Item[];
-  private successList: Item[];
+  private eventList: EventItem<T>[];
   public queue: Queue;
 
   constructor(
@@ -38,8 +40,7 @@ export class QueueService<K extends string = any, T = any> {
     public jobs: IJob<K, T>[],
     queueOptions: QueueOptions = {},
   ) {
-    this.successList = [];
-    this.failedList = [];
+    this.eventList = [];
     this.queue = new Bull(queueName, {
       redis: redisConfig,
       ...queueOptions,
@@ -51,15 +52,30 @@ export class QueueService<K extends string = any, T = any> {
     LoggerJobs[type](`QueueService ${message}`);
   }
 
-  public onFailed(jobName: K, callback: FailedEventCallback<T>) {
-    this.failedList.push({ key: jobName, callback, uid: uuidV4() });
+  public onTryFailed(key: K, callback: FailedEventCallback<T>) {
+    this.eventList.push({ key, eventType: 'trying', callback, uid: uuidV4() });
     return this;
   }
 
-  public onSuccess(jobName: K, callback: CompletedEventCallback<T>) {
-    this.successList.push({ key: jobName, callback, uid: uuidV4() });
+  public onFailed(key: K, callback: FailedEventCallback<T>) {
+    this.eventList.push({ key, eventType: 'failed', callback, uid: uuidV4() });
     return this;
   }
+
+  public onSuccess(key: K, callback: CompletedEventCallback<T>) {
+    this.eventList.push({ key, eventType: 'success', callback, uid: uuidV4() });
+    return this;
+  }
+
+  // public onFailed(jobName: K, callback: FailedEventCallback<T>) {
+  //   this.failedList.push({ key: jobName, callback, uid: uuidV4() });
+  //   return this;
+  // }
+
+  // public onSuccess(jobName: K, callback: CompletedEventCallback<T>) {
+  //   this.successList.push({ key: jobName, callback, uid: uuidV4() });
+  //   return this;
+  // }
 
   async add(jobName: K, data: T, jobOptions: JobOptions = {}): Promise<Job<T>> {
     const job = await this.queue.add(jobName, data, { ...jobOptions });
@@ -67,52 +83,47 @@ export class QueueService<K extends string = any, T = any> {
   }
 
   public process() {
-    const processFails = (job: Job, err: Error) => {
-      const failedList = this.failedList.filter(f => f.key === job.name);
-      failedList.forEach(failedJob => {
-        try {
-          failedJob?.callback(job, err);
-          this.failedList = this.failedList.filter(f => f.uid !== failedJob.uid);
-        } catch {
-          this.log(`failedList ${job.name}:${job?.id} failed:${job?.failedReason}`);
-        }
-      });
-    };
+    const processEvents = async (
+      eventType: EventType,
+      job: Job,
+      payload: Error | any,
+      attemptsRest = 0,
+    ): Promise<void> => {
+      const processList = this.eventList.filter(
+        f => f.key === job.name && f.eventType === eventType,
+      );
 
-    const processSuccess = (job: Job, result: any) => {
-      const successList = this.successList.filter(f => f.key === job.name);
-      successList.forEach(successJob => {
+      const remove = !!(eventType !== 'trying' || (eventType === 'trying' && attemptsRest <= 1));
+
+      processList.forEach(itemJob => {
         try {
-          successJob?.callback(job, result);
-          this.successList = this.successList.filter(f => f.uid !== successJob.uid);
+          itemJob?.callback(job, payload);
+          if (remove) this.eventList = this.eventList.filter(f => f.uid !== itemJob.uid);
         } catch (error) {
           this.log(
-            `successList ${this.queueName} ${job.name}:${job?.id} error:${
-              job?.failedReason || error?.message
-            }`,
+            `processEvents ${this.queueName}:
+            ${eventType}:${job.name}:${job?.id} error:${job?.failedReason || error?.message}`,
           );
         }
       });
     };
 
-    this.queue.on('failed', (job, err) => {
+    this.queue.on('failed', async (job, err) => {
       const attempts = Number(job.opts?.attempts) || 0;
       const attemptsMade = Number(job?.attemptsMade) || 0;
-      this.log(`${this.queueName} ${job.name}:${job?.id} attemptsMade:${attemptsMade}`, 'info');
 
       if (attemptsMade >= attempts) {
         this.log(`${this.queueName} ${job.name}:${job?.id} failed:${job?.failedReason}`);
-        processFails(job, err);
+        processEvents('failed', job, err);
       } else {
         this.log(`${this.queueName} ${job.name}:${job?.id} trying:${attemptsMade}`, 'info');
+        processEvents('trying', job, err, attempts - attemptsMade);
       }
     });
 
-    this.queue.on('completed', (job, result) => {
+    this.queue.on('completed', async (job, result) => {
       this.log(`${this.queueName} ${job.name}:${job?.id} complete`, 'info');
-
-      // console.log('result', result);
-      processSuccess(job, result);
+      processEvents('success', job, result);
     });
 
     return Promise.all(
@@ -122,14 +133,3 @@ export class QueueService<K extends string = any, T = any> {
     );
   }
 }
-
-// interface Test {
-//   id: number;
-// }
-// const j: IJob<Test>[] = [
-//   { name: 'Teste1', handle: ({ data }) => console.log(data.id) },
-//   { name: 'Teste2', handle: ({ data }) => console.log(data.id) },
-// ];
-
-// const a = new QueueService<string, Test>('teste', j);
-// a.add('Teste1', { id: 1 }, { attempts: 2 }).then(job1 => job1.data.id);

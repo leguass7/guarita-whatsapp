@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
 
 import { IJob } from '#/services/QueueService';
 
@@ -16,8 +16,8 @@ export function createSendLogJob(
   return {
     name: 'SendFailure',
     handle: async () => {
-      const result = await sendLogService.findByDate(new Date(), false);
-      console.log(result.length, format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
+      const _result = await sendLogService.findByDate(new Date(), false);
+      // console.log(result.length, format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
       // implementar envio de e-mail
       return true;
     },
