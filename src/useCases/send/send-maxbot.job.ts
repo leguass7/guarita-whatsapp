@@ -20,14 +20,13 @@ export interface QueuePayload extends Job {
   data: SendMaxbotPayload;
 }
 
-const queueTimetout = 30000;
+const queueTimetout = 10001;
 export const defaultJobOptions: JobOptions = {
   delay: 10,
-  attempts: 5,
+  attempts: 3,
   timeout: queueTimetout - 1,
   backoff: {
     type: 'exponential',
-    // delay: 1000, // test dev
     delay: 120000,
   },
 };
@@ -55,7 +54,6 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     if (!Boolean(response?.status)) {
       throw new MaxbotException(response.msg, response);
     }
-    // console.log(`\nENVIANDO`, to, format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
 
     return response as ISendTextResult;
   },

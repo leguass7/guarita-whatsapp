@@ -41,11 +41,7 @@ export class QueueService<K extends string = any, T = any> {
     queueOptions: QueueOptions = {},
   ) {
     this.eventList = [];
-    this.queue = new Bull(queueName, {
-      redis: redisConfig,
-      ...queueOptions,
-      // limiter: { duration: 2000, max: 1 },
-    });
+    this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
   }
 
   public log(message: string, type: 'error' | 'info' = 'error') {
@@ -67,19 +63,15 @@ export class QueueService<K extends string = any, T = any> {
     return this;
   }
 
-  // public onFailed(jobName: K, callback: FailedEventCallback<T>) {
-  //   this.failedList.push({ key: jobName, callback, uid: uuidV4() });
-  //   return this;
-  // }
-
-  // public onSuccess(jobName: K, callback: CompletedEventCallback<T>) {
-  //   this.successList.push({ key: jobName, callback, uid: uuidV4() });
-  //   return this;
-  // }
-
   async add(jobName: K, data: T, jobOptions: JobOptions = {}): Promise<Job<T>> {
     const job = await this.queue.add(jobName, data, { ...jobOptions });
     return job;
+  }
+
+  async destroy() {
+    const jobs = await this.queue.getJobs(['waiting', 'paused', 'delayed']);
+    jobs.forEach(job => job?.remove());
+    this.queue.close(true);
   }
 
   public process() {

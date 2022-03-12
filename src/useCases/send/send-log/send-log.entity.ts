@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 'typeorm';
 
+export type EnventType = 'success' | 'failed' | 'trying';
 @Entity('send-logs')
 export class SendLog {
   @PrimaryGeneratedColumn('uuid')
@@ -17,8 +18,11 @@ export class SendLog {
   @Column({ nullable: false })
   status?: boolean;
 
+  @Column({ nullable: true, enum: ['success', 'failed', 'trying'], type: 'enum' })
+  eventType?: EnventType;
+
   @Column({ nullable: true })
-  eventType?: string;
+  jobId?: string;
 
   @Column({ nullable: true, default: 0 })
   attemptsMade?: number;

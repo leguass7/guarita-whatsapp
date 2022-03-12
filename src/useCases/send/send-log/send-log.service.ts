@@ -1,9 +1,10 @@
 import { format } from 'date-fns';
-import { FindConditions, FindManyOptions, getRepository, Like } from 'typeorm';
+import { FindConditions, FindManyOptions, getRepository, In, Like } from 'typeorm';
 
+import { makeArray } from '#/helpers/array';
 import { isDefined } from '#/helpers/validation';
 
-import type { CreateSendLog } from './send-log.dto';
+import type { CreateSendLog, FilterSendLogDto } from './send-log.dto';
 import { SendLog } from './send-log.entity';
 
 export class SendLogService {
@@ -14,13 +15,16 @@ export class SendLogService {
     return result;
   }
 
-  async findByDate(date: Date, status?: boolean) {
+  async findByDate(date: Date, { status, eventType }: FilterSendLogDto = {}) {
     const repository = getRepository(SendLog);
     const where: FindConditions<SendLog> = {
-      createdAt: Like(`%${format(date, 'yyyy-MM-dd')}%`),
+      scheduled: Like(`%${format(date, 'yyyy-MM-dd')}%`),
+      // eventType: In(['failed', 'success']),
     };
+
     if (isDefined(status)) where.status = !!status;
-    const result = await repository.find({ where });
+    if (isDefined(eventType)) where.eventType = In(makeArray(eventType));
+    const result = await repository.find({ where, order: { scheduled: 'ASC', createdAt: 'ASC' } });
     return result;
   }
 

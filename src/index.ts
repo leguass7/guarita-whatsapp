@@ -9,8 +9,8 @@ export async function startServer() {
   const database = await createDatabase({
     ...dbConfig,
     synchronize: isDevMode,
-    logging: ['error'],
-    // logging: ['error', 'query'],
+    //logging: ['error'],
+    logging: ['error', 'query'],
   });
 
   if (database?.isConnected) {
@@ -21,3 +21,7 @@ export async function startServer() {
 }
 
 if (nodeEnv !== 'testing') startServer();
+
+export async function closeServer() {
+  return appExpress.close();
+}

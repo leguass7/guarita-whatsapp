@@ -20,3 +20,29 @@ Precisamos de um server responsável apenas por essas entregas.
    - https://zellwk.com/blog/github-actions-deploy/
    - https://firefart.at/post/using-mysql-service-with-github-actions/
    - https://www.vultr.com/?ref=8956372-8H
+
+---
+
+### Cron
+
+[Cron generator](https://crontab.cronhub.io/)
+
+```bash
+
+# ┌──────────── minute
+# │ ┌────────── hour
+# │ │ ┌──────── day of month
+# │ │ │ ┌────── month
+# │ │ │ │ ┌──── day of week
+# │ │ │ │ │
+# │ │ │ │ │
+# * * * * * 
+```
+
+```javascript
+// Repeat payment job once every day at 3:15 (am)
+queue.add(paymentsData, { repeat: { cron: '15 3 * * *' } });
+
+// Every 5 minutes
+queue.add(paymentsData, { repeat: { cron: '*/5 * * * *' } });
+```
