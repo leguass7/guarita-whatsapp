@@ -1,4 +1,5 @@
-import { logError } from '#/services/logger';
+import { env } from '#/config';
+import { logError, logging } from '#/services/logger';
 import { QueueService } from '#/services/QueueService';
 
 import { createSendLogJob } from './send-log/job/send-log.job';
@@ -18,10 +19,11 @@ const sendLogsQueue = new QueueService('SENDLOGS_QUEUE', [createSendLogJob(sendL
 sendLogsQueue
   .onTryFailed('SendFailures', ({ failedReason }) => logError('TENTATIVA NO EMAIL', failedReason))
   .onFailed('SendFailures', ({ failedReason }) => logError('FALHA NO EMAIL', failedReason))
+  .onSuccess('SendFailures', () => logging(`RELATÓRIO DE FALHAS ENVIADO ${env.CRON_SENDLOGS}`))
   .add(
     'SendFailures',
     { startedIn: new Date() },
-    { repeat: { cron: '10 17 * * *' }, removeOnComplete: true },
+    { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true },
   );
 
 export { SendRoute, sendService, sendLogService, sendMaxbotQueue } from './send.route';

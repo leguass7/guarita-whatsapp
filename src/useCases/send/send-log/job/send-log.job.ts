@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 
 import { MailService } from '#/services/EmailService';
-import { logging } from '#/services/logger';
 import { IJob } from '#/services/QueueService';
 
 import { SendLogService } from '../send-log.service';
@@ -29,15 +28,14 @@ export function createSendLogJob(
       const txtDate = format(date, 'dd/MM/yyyy');
 
       const mailService = new MailService('smtp');
-      await mailService.send({
+      const sent = await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
         to: 'Leandro Sbrissa <leandro.sbrissa@hotmail.com>, Joaquim <dev@avatarsolucoesdigitais.com.br>',
         subject: `Falhas de envio dia ${txtDate}`,
         html: buildMailBody({ date, successLength, failedList, tryingLength }),
       });
-      logging('RELATÓRIO DE FALHA ENVIADO', txtDate);
 
-      return true;
+      return sent;
     },
   };
 }

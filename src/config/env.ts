@@ -23,6 +23,8 @@ export const env = {
   SMTP_PASS: process.env.SMTP_PASS,
   SMTP_SECURE: process.env?.SMTP_SECURE === '1' ? true : false,
   SENDGRID_KEY: process.env?.SENDGRID_KEY,
+
+  CRON_SENDLOGS: process.env?.CRON_SENDLOGS || '59 23 * * *',
   //
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: Number(process.env?.REDIS_PORT) || 6379,
