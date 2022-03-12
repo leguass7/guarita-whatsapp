@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "license": "UNLICENSED",
   "scripts": {
-    "release": "standard-version --no-verify --skip.tag --release-as patch",
+    "release": "standard-version --no-verify --skip.tag --release-as patch -a",
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig-build.json && tscpaths -p tsconfig-build.json -s ./src -o ./dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
@@ -15,7 +15,10 @@
     "lint": "eslint ./src --ext js --ext ts --fix"
   },
   "standard-version": {
-    "infile": "docs/CHANGELOG.md"
+    "infile": "docs/CHANGELOG.md",
+    "scripts": {
+      "postbump": "node ./scripts/release.js && git add . && git add -A"
+    }
   },
   "repository": {
     "type": "git",
