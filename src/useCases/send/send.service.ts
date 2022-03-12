@@ -33,7 +33,10 @@ export class SendService {
   }
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
-    return async ({ attemptsMade, failedReason: message = '' }: Job, { response = '' }: any) => {
+    return async (
+      { attemptsMade, failedReason: message = '', id }: Job,
+      { response = '' }: any,
+    ) => {
       //
       const created = await this.sendLogService.create({
         ...data,
@@ -42,6 +45,7 @@ export class SendService {
         response,
         createdAt: new Date(),
         attemptsMade: attemptsMade || -1,
+        jobId: id ? `${id}` : null,
       });
       if (log && typeof log === 'function') log(created.id);
       return created;
@@ -49,7 +53,7 @@ export class SendService {
   }
 
   private processSuccess(data: CreateSendLog, log?: LogCallback): CompletedEventCallback {
-    return async ({ attemptsMade }: Job, { msgId, msg: message }: ISendTextResult) => {
+    return async ({ attemptsMade, id }: Job, { msgId, msg: message }: ISendTextResult) => {
       //
       const created = await this.sendLogService.create({
         ...data,
@@ -58,6 +62,7 @@ export class SendService {
         messageId: msgId,
         createdAt: new Date(),
         attemptsMade: attemptsMade || 0,
+        jobId: id ? `${id}` : null,
       });
       if (log && typeof log === 'function') log(created.id);
 

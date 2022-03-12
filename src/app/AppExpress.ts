@@ -53,6 +53,10 @@ export class AppExpress {
     queues.map(queue => queue?.process());
   }
 
+  public async close() {
+    return Promise.all(queues.map(queue => queue?.destroy()));
+  }
+
   async start() {
     this.middlewares();
     this.routes();

@@ -21,3 +21,7 @@ export async function startServer() {
 }
 
 if (nodeEnv !== 'testing') startServer();
+
+export async function closeServer() {
+  return appExpress.close();
+}

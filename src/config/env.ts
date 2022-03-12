@@ -16,10 +16,13 @@ export const env = {
   DB_PORT: Number(process.env.DB_PORT) || 5433,
   DB_URL: process.env.DB_URL, // mysql://user:password@host/database_name
   //
+  MAIL_FROM: process.env?.MAIL_FROM,
   SMTP_HOST: process.env.SMTP_HOST,
   SMTP_PORT: Number(process.env.SMTP_PORT) || 587,
   SMTP_USER: process.env.SMTP_USER,
-  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_SECURE: process.env?.SMTP_SECURE === '1' ? true : false,
+  SENDGRID_KEY: process.env?.SENDGRID_KEY,
   //
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: Number(process.env?.REDIS_PORT) || 6379,

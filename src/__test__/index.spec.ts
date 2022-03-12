@@ -1,7 +1,7 @@
 import request, { SuperTest } from 'supertest';
 
 import { env } from '../config';
-import { startServer } from '../index';
+import { startServer, closeServer } from '../index';
 
 const to = env.WHATSAPP_TEST;
 
@@ -15,7 +15,8 @@ describe('Test server features', () => {
   });
 
   afterAll(async () => {
-    await new Promise(resolve =>
+    await closeServer();
+    return new Promise(resolve =>
       setTimeout(() => {
         app = undefined;
         resolve(true);
