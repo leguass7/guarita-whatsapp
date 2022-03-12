@@ -29,7 +29,7 @@ export function createSendLogJob(
       const txtDate = format(date, 'dd/MM/yyyy');
 
       const mailService = new MailService('smtp');
-      const sent = await mailService.send({
+      await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
         to: 'Leandro Sbrissa <leandro.sbrissa@hotmail.com>, Joaquim <dev@avatarsolucoesdigitais.com.br>',
         subject: `Falhas de envio dia ${txtDate}`,
@@ -37,7 +37,7 @@ export function createSendLogJob(
       });
       logging('RELATÓRIO DE FALHA ENVIADO', txtDate);
 
-      return sent;
+      return true;
     },
   };
 }

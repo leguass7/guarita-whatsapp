@@ -2,6 +2,7 @@ import type { Job, JobOptions } from 'bull';
 // import { format } from 'date-fns';
 
 import { MaxbotException } from '#/app/exceptions/MaxbotException';
+import { nodeEnv } from '#/config';
 import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
 import { QueueService, IJob } from '#/services/QueueService';
 
@@ -20,16 +21,19 @@ export interface QueuePayload extends Job {
   data: SendMaxbotPayload;
 }
 
-const queueTimetout = 10001;
+const testing = !!(nodeEnv === 'testing');
+
 export const defaultJobOptions: JobOptions = {
-  delay: 10,
-  attempts: 3,
-  timeout: queueTimetout - 1,
-  backoff: {
-    type: 'exponential',
-    delay: 120000,
-  },
+  attempts: 1,
+  timeout: 15000,
+  backoff: { delay: 100, type: 'fixed' },
 };
+
+if (!testing) {
+  defaultJobOptions.delay = 100;
+  defaultJobOptions.attempts = 3;
+  defaultJobOptions.backoff = { type: 'exponential', delay: 120000 };
+}
 
 export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
   name: 'SendMaxbotText',
@@ -37,8 +41,9 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     const { token, to, text } = data;
 
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
+    // return { status: 1, msg: 'test' };
 
-    const maxbot = new MaxbotService({ token, timeout: queueTimetout });
+    const maxbot = new MaxbotService({ token, timeout: 3000 });
     const isReady = await maxbot.getStatus();
 
     if (!isReady) {
@@ -64,7 +69,10 @@ export const sendMaxbotImage: IJob<JobNames, SendMaxbotPayload> = {
   async handle({ data }) {
     const { token, to, url } = data;
 
-    const maxbot = new MaxbotService({ token, timeout: queueTimetout });
+    throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
+    // return { status: 1, msg: 'test' };
+
+    const maxbot = new MaxbotService({ token, timeout: 3000 });
     const isReady = await maxbot.getStatus();
     if (!isReady) {
       throw new MaxbotException(`SendMaxbotImage is not ready ${to}`, {

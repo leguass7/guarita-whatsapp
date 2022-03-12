@@ -21,7 +21,7 @@ export interface IAppOptions {
 
 export class AppExpress {
   private readonly port: number;
-  public readonly express: Express;
+  public express: Express;
   private readonly env: NodeEnv;
   private started: boolean;
 

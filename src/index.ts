@@ -3,7 +3,7 @@ import { httpPort, isDevMode, dbConfig, nodeEnv } from './config';
 import { createDatabase } from './database';
 import { logging } from './services/logger';
 
-const appExpress = new AppExpress({ port: httpPort, env: nodeEnv });
+const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv });
 
 export async function startServer() {
   const database = await createDatabase({
@@ -13,15 +13,21 @@ export async function startServer() {
     // logging: ['error', 'query'],
   });
 
+  const closeServer = async () => {
+    if (database?.isConnected) database?.close();
+    await serverHttp.close();
+    serverHttp.express = null;
+  };
+
   if (database?.isConnected) {
     logging('DATABASE CONNECTED: ', dbConfig.host);
-    return appExpress.listen();
+    return {
+      serverHttp,
+      server: await serverHttp.listen(),
+      closeServer,
+    };
   }
   return null;
 }
 
 if (nodeEnv !== 'testing') startServer();
-
-export async function closeServer() {
-  return appExpress.close();
-}
