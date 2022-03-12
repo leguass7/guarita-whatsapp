@@ -61,10 +61,6 @@ export class AppExpress {
     this.middlewares();
     this.routes();
     await this.startQueues();
-    // const bulls = queues.reduce((acc, queue) => {
-    //   queue.getQueues().forEach(q => acc.push(q.bull));
-    //   return acc;
-    // }, []);
     this.started = true;
     return this;
   }

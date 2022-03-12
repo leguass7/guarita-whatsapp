@@ -2,7 +2,7 @@ import type { Job, JobOptions } from 'bull';
 // import { format } from 'date-fns';
 
 import { MaxbotException } from '#/app/exceptions/MaxbotException';
-import { nodeEnv } from '#/config';
+// import { nodeEnv } from '#/config';
 import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
 import { QueueService, IJob } from '#/services/QueueService';
 
@@ -21,19 +21,20 @@ export interface QueuePayload extends Job {
   data: SendMaxbotPayload;
 }
 
-const testing = !!(nodeEnv === 'testing');
+// const testing = !!(nodeEnv === 'testing');
 
 export const defaultJobOptions: JobOptions = {
-  attempts: 1,
-  timeout: 15000,
-  backoff: { delay: 100, type: 'fixed' },
+  delay: 100,
+  attempts: 3,
+  timeout: 24000,
+  backoff: { type: 'exponential', delay: 120000 },
 };
 
-if (!testing) {
-  defaultJobOptions.delay = 100;
-  defaultJobOptions.attempts = 3;
-  defaultJobOptions.backoff = { type: 'exponential', delay: 120000 };
-}
+// if (!testing) {
+//   defaultJobOptions.delay = 100;
+//   defaultJobOptions.attempts = 3;
+//   defaultJobOptions.backoff = { type: 'exponential', delay: 120000 };
+// }
 
 export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
   name: 'SendMaxbotText',
@@ -43,7 +44,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
 
-    const maxbot = new MaxbotService({ token, timeout: 3000 });
+    const maxbot = new MaxbotService({ token, timeout: 5000 });
     const isReady = await maxbot.getStatus();
 
     if (!isReady) {
@@ -69,10 +70,10 @@ export const sendMaxbotImage: IJob<JobNames, SendMaxbotPayload> = {
   async handle({ data }) {
     const { token, to, url } = data;
 
-    throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
+    // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
 
-    const maxbot = new MaxbotService({ token, timeout: 3000 });
+    const maxbot = new MaxbotService({ token, timeout: 5000 });
     const isReady = await maxbot.getStatus();
     if (!isReady) {
       throw new MaxbotException(`SendMaxbotImage is not ready ${to}`, {

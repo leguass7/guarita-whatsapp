@@ -124,7 +124,7 @@ export class QueueService<K extends string = any, T = any> {
 
     return Promise.all(
       this.jobs.map(async jobItem => {
-        this.queue.process(jobItem.name, 2, jobItem.handle);
+        return this.queue.process(jobItem.name, 1, jobItem.handle);
       }),
     );
   }

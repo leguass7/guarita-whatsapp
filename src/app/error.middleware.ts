@@ -59,7 +59,7 @@ export function errorMiddleware(
     result.message = error.message || 'Token inválido';
   }
 
-  logError(result?.status, result?.message);
+  logError(result?.status || 'no status', result?.message || 'no message');
   // console.error('\n', error?.stack, error);
   // console.log('Erro não identificado');
 
