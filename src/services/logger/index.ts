@@ -52,7 +52,7 @@ export function logging(...args: any[]) {
 }
 
 export function logError(...args: any[]) {
-  return Logger.error('logError', args.join(' '));
+  return Logger.error(args.join(' '));
 }
 
 export function logDev(...args: any[]) {

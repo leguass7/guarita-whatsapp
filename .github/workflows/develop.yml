@@ -18,6 +18,8 @@ jobs:
     services:
       redis: 
         image: redis:alpine
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -61,7 +63,7 @@ jobs:
       - name: 🚀 Test App
         run: yarn test
         env:
-          REDIS_HOST: redis
+          REDIS_HOST: localhost
           REDIS_PORT: 6379
           DB_TYPE: mysql
           DB_HOST: 127.0.0.1

@@ -21,7 +21,7 @@ export interface IAppOptions {
 
 export class AppExpress {
   private readonly port: number;
-  public readonly express: Express;
+  public express: Express;
   private readonly env: NodeEnv;
   private started: boolean;
 
@@ -61,10 +61,6 @@ export class AppExpress {
     this.middlewares();
     this.routes();
     await this.startQueues();
-    // const bulls = queues.reduce((acc, queue) => {
-    //   queue.getQueues().forEach(q => acc.push(q.bull));
-    //   return acc;
-    // }, []);
     this.started = true;
     return this;
   }

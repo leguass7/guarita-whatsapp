@@ -15,7 +15,7 @@ const sendLogService = new SendLogService();
 const sendMaxbotQueue = new QueueService('MAXBOT_QUEUE', [sendMaxbotMessage, sendMaxbotImage], {
   defaultJobOptions,
   prefix: 'GUARITA_WHATSAPP',
-  limiter: { max: 1, duration: 1000 },
+  limiter: { max: 3, duration: 1500 },
 });
 
 const sendService = new SendService(sendMaxbotQueue, sendLogService, cacheService);

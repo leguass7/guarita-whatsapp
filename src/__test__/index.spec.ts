@@ -1,26 +1,32 @@
 import request, { SuperTest } from 'supertest';
 
+// import { AppExpress } from '#/app/AppExpress';
+
 import { env } from '../config';
-import { startServer, closeServer } from '../index';
+import { startServer } from '../index';
 
 const to = env.WHATSAPP_TEST;
 
 describe('Test server features', () => {
-  let token;
+  let token: string;
   let app: SuperTest<request.Test>;
-  jest.setTimeout(30000);
+  // let server: AppExpress;
+  let close: () => Promise<void>;
+  jest.setTimeout(35000);
+
   beforeAll(async () => {
-    const express = await startServer();
-    app = request(express);
+    const { server, closeServer } = await startServer();
+    close = closeServer;
+    app = request(server);
   });
 
   afterAll(async () => {
-    await closeServer();
     return new Promise(resolve =>
-      setTimeout(() => {
+      setTimeout(async () => {
+        await close();
         app = undefined;
         resolve(true);
-      }, 800),
+      }, 8000),
     );
   });
 
@@ -43,10 +49,10 @@ describe('Test server features', () => {
     const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
       provider: 'maxbot',
       type: 'text',
-      message: 'Teste de mensagem TESTING',
+      message: null,
       to: '551212345678',
     });
-    expect(result.status).toBe(200);
+    expect(result.status).toBe(400);
   });
 
   it('Send text message', async () => {

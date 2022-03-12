@@ -69,9 +69,13 @@ export class QueueService<K extends string = any, T = any> {
   }
 
   async destroy() {
-    const jobs = await this.queue.getJobs(['waiting', 'paused', 'delayed']);
-    jobs.forEach(job => job?.remove());
-    this.queue.close(true);
+    const jobs = await this.queue.getJobs(['waiting', 'paused', 'delayed', 'active', 'completed']);
+    await Promise.all(jobs.map(job => job?.remove().catch(() => null)));
+    try {
+      this.queue.close(true).catch(() => null);
+    } finally {
+      return true;
+    }
   }
 
   public process() {
@@ -120,7 +124,7 @@ export class QueueService<K extends string = any, T = any> {
 
     return Promise.all(
       this.jobs.map(async jobItem => {
-        this.queue.process(jobItem.name, 1, jobItem.handle);
+        return this.queue.process(jobItem.name, 1, jobItem.handle);
       }),
     );
   }

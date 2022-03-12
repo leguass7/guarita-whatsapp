@@ -31,7 +31,7 @@ export function errorMiddleware(
     const messages = [];
     error.details.forEach(err => {
       err.details.forEach(msg => {
-        console.log('errorMiddleware isCelebrateError msg', msg); //eslint-disable-line no-console
+        // console.log('errorMiddleware isCelebrateError msg', msg); //eslint-disable-line no-console
         messages.push(msg.message);
       });
     });
@@ -59,7 +59,7 @@ export function errorMiddleware(
     result.message = error.message || 'Token inválido';
   }
 
-  logError(result?.status, result?.message);
+  logError(result?.status || 'no status', result?.message || 'no message');
   // console.error('\n', error?.stack, error);
   // console.log('Erro não identificado');
 
