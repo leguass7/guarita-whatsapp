@@ -30,7 +30,7 @@ export function createSendLogJob(
       const mailService = new MailService('smtp');
       const sent = await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
-        to: 'Leandro Sbrissa <leandro.sbrissa@hotmail.com>, Joaquim <dev@avatarsolucoesdigitais.com.br>',
+        to: 'Leandro Sbrissa <leandro.sbrissa@hotmail.com>, Joaquim <atendimento01@dessistemas.com.br>',
         subject: `Falhas de envio dia ${txtDate}`,
         html: buildMailBody({ date, successLength, failedList, tryingLength }),
       });
