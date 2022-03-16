@@ -1,15 +1,24 @@
 import { format } from 'date-fns';
 
+import { isDevMode } from '#/config';
 import { MailService } from '#/services/EmailService';
-import { IJob } from '#/services/QueueService';
+import type { IJob, QueueService, JobOptions } from '#/services/QueueService';
 
 import { SendLogService } from '../send-log.service';
-import { buildMailBody } from './send-log.html';
+import { buildMailBody, MailFailedBody } from './send-log.html';
 
-export type SendLogJobNames = 'SendFailures';
+export type SendLogJobNames = 'SendFailures' | 'SendLogBody';
 
-export type SendLogPayload = {
-  startedIn?: Date;
+export type SendLogPayload = { startedIn?: Date };
+export type SendLogPayloadBody = { subject: string } & MailFailedBody;
+
+export type SendLogsQueue = QueueService<SendLogJobNames, SendLogPayload | SendLogPayloadBody>;
+
+export const defaultJobOptions: JobOptions = {
+  delay: 10,
+  attempts: 2,
+  timeout: 10000,
+  backoff: { type: 'exponential', delay: 60000 * 30 },
 };
 
 export function createSendLogJob(
@@ -27,11 +36,15 @@ export function createSendLogJob(
       const successLength = logs.filter(f => f.eventType === 'success')?.length;
       const txtDate = format(date, 'dd/MM/yyyy');
 
+      const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${
+        isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''
+      }`;
+
       const mailService = new MailService('smtp');
       const sent = await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
-        to: 'Leandro Sbrissa <leandro.sbrissa@hotmail.com>, Joaquim <atendimento01@dessistemas.com.br>',
-        subject: `Falhas de envio dia ${txtDate}`,
+        to,
+        subject: `Falhas de envio dia ${txtDate}${isDevMode ? ' (TESTE)' : ''}`,
         html: buildMailBody({ date, successLength, failedList, tryingLength }),
       });
 
@@ -39,3 +52,24 @@ export function createSendLogJob(
     },
   };
 }
+
+export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
+  name: 'SendLogBody',
+  handle: async ({ data }) => {
+    const { subject, ...rest } = data;
+
+    const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${
+      !isDevMode ? `, Joaquim <atendimento01@dessistemas.com.br>` : ''
+    }`;
+
+    const mailService = new MailService('smtp');
+    const sent = await mailService.send({
+      from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
+      to,
+      subject,
+      html: buildMailBody(rest),
+    });
+
+    return sent;
+  },
+};

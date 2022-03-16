@@ -1,4 +1,4 @@
 import { QueueService } from '#/services/QueueService';
-import { sendMaxbotQueue, sendLogsQueue } from '#useCases/send';
+import { sendMaxbotQueue, sendLogsQueue, sendLogsBodyQueue } from '#useCases/send';
 
-export const queues: QueueService[] = [sendMaxbotQueue, sendLogsQueue];
+export const queues: QueueService[] = [sendMaxbotQueue, sendLogsQueue, sendLogsBodyQueue];

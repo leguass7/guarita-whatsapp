@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
+import { tryDate } from '#/helpers/date';
+
 import { SendLog } from '../send-log.entity';
 
 export interface MailFailedBody {
@@ -14,9 +16,10 @@ type Row = SendLog & { index: number | string; count?: number };
 
 function row({ to, createdAt, scheduled, message, count, index, eventType }: Row): string {
   const fDate = (d: Date) => {
-    const tz = zonedTimeToUtc(d, 'America/Fortaleza');
+    const tz = zonedTimeToUtc(tryDate(d), 'America/Fortaleza');
     return format(tz, 'dd/MM/yyyy HH:mm:ss');
   };
+
   const props = 'align="left" style="border-bottom:1px dashed #ccc;text-align:left"';
   return `
     <tr>
@@ -66,7 +69,7 @@ export function buildMailBody({
   failedList = [],
   tryingLength = 0,
 }: MailFailedBody): string {
-  const title = `<h2>Relat&oacute;rio de envio de ${format(date, 'dd/MM/yyyy')}</h2>`;
+  const title = `<h2>Relat&oacute;rio de envio de ${format(tryDate(date), 'dd/MM/yyyy')}</h2>`;
   const subtitle = `
   <p>Enviados com sucesso: <strong>${successLength}</strong><br />
   Total de falhas: <strong>${failedList.length}</strong><br />

@@ -14,6 +14,8 @@ import { redisConfig } from '#/config/redis';
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
 
+export type { JobOptions };
+
 type EventType = 'success' | 'failed' | 'trying';
 
 type EventItem<T = any> = {
