@@ -27,14 +27,8 @@ export const defaultJobOptions: JobOptions = {
   delay: 100,
   attempts: 3,
   timeout: 24000,
-  backoff: { type: 'exponential', delay: 120000 },
+  backoff: { type: 'exponential', delay: 60 * 8 * 1000 }, // 8 minutos
 };
-
-// if (!testing) {
-//   defaultJobOptions.delay = 100;
-//   defaultJobOptions.attempts = 3;
-//   defaultJobOptions.backoff = { type: 'exponential', delay: 120000 };
-// }
 
 export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
   name: 'SendMaxbotText',
@@ -44,7 +38,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
 
-    const maxbot = new MaxbotService({ token, timeout: 5000 });
+    const maxbot = new MaxbotService({ token, timeout: 3000 });
     const isReady = await maxbot.getStatus();
 
     if (!isReady) {
@@ -73,7 +67,7 @@ export const sendMaxbotImage: IJob<JobNames, SendMaxbotPayload> = {
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
 
-    const maxbot = new MaxbotService({ token, timeout: 5000 });
+    const maxbot = new MaxbotService({ token, timeout: 3000 });
     const isReady = await maxbot.getStatus();
     if (!isReady) {
       throw new MaxbotException(`SendMaxbotImage is not ready ${to}`, {

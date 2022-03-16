@@ -12,14 +12,14 @@ export class SendLogController {
   constructor(private sendLogService: SendLogService) {}
 
   async now(req: Request, res: Response, _next: NextFunction) {
-    const date = tryDate(req?.query?.date as string) || new Date();
-    // por alguma razão o date-fns está diminuindo 1 dia aqui
-    // console.log('date', date, format(date, 'yyyy-MM-dd'));
-    const job = await this.sendLogService.sendBody(date);
+    const day = tryDate(req?.query?.day as string) || new Date();
+
+    // console.log('\ndate', day, format(day, 'yyyy-MM-dd'), '\n');
+    const job = await this.sendLogService.sendBody(day);
     if (!job) throw new HttpException(500, 'Erro ao agendar envio');
     return res
       .status(200)
-      .send({ success: true, date: format(date, 'yyyy-MM-dd'), jobId: job?.id })
+      .send({ success: true, date: format(day, 'yyyy-MM-dd'), jobId: job?.id })
       .end();
   }
 }

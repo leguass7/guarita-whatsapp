@@ -1,4 +1,3 @@
-import { format as formatDate, isValid, parseISO } from 'date-fns';
 import { join } from 'path';
 import { createLogger, transports, format, addColors } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
@@ -6,10 +5,7 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 import { isDevMode, pathVolume, projectName, projectVersion } from '#/config';
 
 const myFormat = format.printf(({ level, message, timestamp }) => {
-  const lv = level.toUpperCase() || '';
-  const d = parseISO(timestamp);
-  const date = isValid(d) ? formatDate(d, 'yyyy-MM-dd HH:mm:ss') : timestamp;
-  return `${date} ${lv}: ${message}`;
+  return `${timestamp} ${level}: ${message}`;
 });
 
 //see more abour log Rotate at
@@ -21,18 +17,18 @@ const daillyRotateOpts = {
   datePattern: 'YYYY-MM-DD',
   frequency: '1d',
   zippedArchive: true,
-  maxSize: '2m',
+  maxSize: '1m',
   maxFiles: '7d',
 };
 
 const jobsErrors: DailyRotateFile.DailyRotateFileTransportOptions = {
-  auditFile: join(pathVolume, 'logs', 'error-config-audit.json'),
+  auditFile: join(pathVolume, 'logs', 'error-jobs-config-audit.json'),
   datePattern: 'YYYY-MM-DD',
   dirname: join(pathVolume, 'logs'),
   filename: `${projectName}-${projectVersion}-JOBS.log`,
   zippedArchive: true,
   frequency: '1d',
-  maxSize: '2m',
+  maxSize: '1m',
   maxFiles: '7d',
 };
 
@@ -42,7 +38,7 @@ addColors({ error: 'red', warn: 'yellow', info: 'green', http: 'magenta', debug:
 
 export const Logger = createLogger({
   exitOnError: false,
-  format: format.combine(format.timestamp(), myFormat),
+  format: format.combine(format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), myFormat),
   transports: [new DailyRotateFile(daillyRotateOpts), new transports.Console()],
   levels,
 });
@@ -65,7 +61,8 @@ export function logWarn(...args: any[]) {
 
 export const LoggerJobs = createLogger({
   exitOnError: false,
-  format: format.combine(format.timestamp(), myFormat),
+  format: format.combine(format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), myFormat),
   transports: [new DailyRotateFile(jobsErrors), new transports.Console()],
   level: 'error',
+  // levels,
 });
