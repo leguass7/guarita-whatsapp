@@ -2,7 +2,7 @@ import type { CompletedEventCallback, FailedEventCallback, Job } from 'bull';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
 import { CacheService } from '#/services/ChacheService';
-import { logging } from '#/services/logger';
+import { logError, logging } from '#/services/logger';
 import { LogClass } from '#/services/logger/log-decorator';
 
 import { CreateSendLog } from './send-log/send-log.dto';
@@ -48,6 +48,7 @@ export class SendService {
         jobId: id ? `${id}` : null,
       });
       if (log && typeof log === 'function') log(created.id);
+      logError(`SendService processFailed type=${data?.eventType} to=${data.to} ${message}`);
       return created;
     };
   }
