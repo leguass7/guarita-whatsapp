@@ -1,8 +1,7 @@
 import type { Job, JobOptions } from 'bull';
-// import { format } from 'date-fns';
 
 import { MaxbotException } from '#/app/exceptions/MaxbotException';
-// import { nodeEnv } from '#/config';
+import { logError } from '#/services/logger';
 import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
 import { QueueService, IJob } from '#/services/QueueService';
 
@@ -42,6 +41,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     const isReady = await maxbot.getStatus();
 
     if (!isReady) {
+      logError(`SendMaxbotText is not ready ${to}`);
       throw new MaxbotException(`SendMaxbotText is not ready ${to}`, {
         getStatus: true,
         status: 0,
