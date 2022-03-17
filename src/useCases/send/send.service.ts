@@ -37,7 +37,11 @@ export class SendService {
       { attemptsMade, failedReason: message = '', id }: Job,
       { response = '' }: any,
     ) => {
-      //
+      const jobId = id ? `${id}` : null;
+      const toAttemptsMade = attemptsMade || -1;
+      const has = await this.sendLogService.findOne({ jobId, attemptsMade: toAttemptsMade });
+      if (has) return has;
+
       const created = await this.sendLogService.create({
         ...data,
         status: false,
@@ -45,7 +49,7 @@ export class SendService {
         response,
         createdAt: new Date(),
         attemptsMade: attemptsMade || -1,
-        jobId: id ? `${id}` : null,
+        jobId,
       });
       if (log && typeof log === 'function') log(created.id);
       logError(`SendService processFailed type=${data?.eventType} to=${data.to} ${message}`);
@@ -89,16 +93,12 @@ export class SendService {
 
     const priority = this.getPriority(to);
 
-    const job = (
-      await this.maxbotJob.push(
-        'SendMaxbotText',
-        { token, to, text },
-        { priority, removeOnComplete: true },
-      )
-    )
-      .try()
+    const job = await this.maxbotJob
+      .setWorker('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true })
+      .trying()
       .failed()
-      .success();
+      .success()
+      .save();
     // .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
     // .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
     // .onSuccess('SendMaxbotText', this.processSuccess(save, log))

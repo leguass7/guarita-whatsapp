@@ -13,6 +13,7 @@ import { redisConfig } from '#/config/redis';
 
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
+import { QueueWorker } from './QueueWorker';
 
 export type { JobOptions };
 
@@ -36,7 +37,7 @@ export interface IJob<K extends string = any, J = any> {
 @LogClass
 export class QueueService<K extends string = any, T = any> {
   private eventList: EventItem<T>[];
-  private list: EventItem<T>[];
+  private workers: QueueWorker<T>[];
   public queue: Queue;
 
   constructor(
@@ -45,7 +46,7 @@ export class QueueService<K extends string = any, T = any> {
     queueOptions: QueueOptions = {},
   ) {
     this.eventList = [];
-    this.list = [];
+    this.workers = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
   }
 
@@ -73,28 +74,11 @@ export class QueueService<K extends string = any, T = any> {
     return job;
   }
 
-  public push(key: K, data: T, jobOptions: JobOptions = {}) {
-    const success = (callback: CompletedEventCallback<T>) => {
-      this.list.push({ jobId, key, eventType: 'success', callback, uid: uuidV4() });
-      return { job };
-    };
+  public setWorker(jobName: K, data: T, jobOptions: JobOptions = {}) {
+    const queueWorker = new QueueWorker<T>(this.queue, { jobName, data, jobOptions });
 
-    const failed = (job: Job<T>) => (callback: FailedEventCallback<T>) => {
-      this.list.push({ jobId, key, eventType: 'failed', callback, uid: uuidV4() });
-      return { job, success };
-    };
-
-    const toTry = (callback: FailedEventCallback<T>) => {
-      this.list.push({ jobId, key, eventType: 'trying', callback, uid: uuidV4() });
-      return { job, failed, success };
-    };
-
-    const add = async () => {
-      const job = await this.queue.add(key, data, { ...jobOptions });
-      return job;
-    };
-
-    return { try: toTry, failed, success, add };
+    this.workers.push(queueWorker);
+    return queueWorker;
   }
 
   async destroy() {
@@ -114,6 +98,11 @@ export class QueueService<K extends string = any, T = any> {
       payload: Error | any,
       attemptsRest = 0,
     ): Promise<void> => {
+      const processWorkers = this.workers.filter(f => f.jobId === job.id);
+      processWorkers.forEach(worker => {
+        //
+      });
+
       const processList = this.eventList.filter(
         f => f.key === job.name && f.eventType === eventType,
       );

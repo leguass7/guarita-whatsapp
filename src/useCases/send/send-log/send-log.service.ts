@@ -38,6 +38,12 @@ export class SendLogService {
     return result;
   }
 
+  async findOne(where: FindConditions<SendLog>) {
+    const repository = getRepository(SendLog);
+    const result = await repository.findOne({ where });
+    return result;
+  }
+
   async sendBody(date: Date) {
     const logs = await this.findByDate(date);
     const failedList = logs.filter(f => f.eventType === 'failed');
