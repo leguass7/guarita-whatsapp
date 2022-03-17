@@ -25,7 +25,7 @@ export interface QueuePayload extends Job {
 export const defaultJobOptions: JobOptions = {
   delay: 100,
   attempts: 3,
-  timeout: 24000,
+  timeout: 30000,
   backoff: { type: 'exponential', delay: 60 * 8 * 1000 }, // 8 minutos
 };
 

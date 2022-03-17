@@ -17,8 +17,9 @@ import { LogClass } from '../logger/log-decorator';
 export type { JobOptions };
 
 type EventType = 'success' | 'failed' | 'trying';
-
+type JobId = string | number;
 type EventItem<T = any> = {
+  jobId?: JobId;
   uid: string;
   eventType: EventType;
   key: string;
@@ -35,6 +36,7 @@ export interface IJob<K extends string = any, J = any> {
 @LogClass
 export class QueueService<K extends string = any, T = any> {
   private eventList: EventItem<T>[];
+  private list: EventItem<T>[];
   public queue: Queue;
 
   constructor(
@@ -43,11 +45,12 @@ export class QueueService<K extends string = any, T = any> {
     queueOptions: QueueOptions = {},
   ) {
     this.eventList = [];
+    this.list = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
   }
 
   public log(message: string, type: 'error' | 'info' = 'error') {
-    LoggerJobs[type](`QueueService ${message}`);
+    LoggerJobs[type](`QueueService ${this.queueName} ${message}`);
   }
 
   public onTryFailed(key: K, callback: FailedEventCallback<T>) {
@@ -68,6 +71,30 @@ export class QueueService<K extends string = any, T = any> {
   async add(jobName: K, data: T, jobOptions: JobOptions = {}): Promise<Job<T>> {
     const job = await this.queue.add(jobName, data, { ...jobOptions });
     return job;
+  }
+
+  public push(key: K, data: T, jobOptions: JobOptions = {}) {
+    const success = (callback: CompletedEventCallback<T>) => {
+      this.list.push({ jobId, key, eventType: 'success', callback, uid: uuidV4() });
+      return { job };
+    };
+
+    const failed = (job: Job<T>) => (callback: FailedEventCallback<T>) => {
+      this.list.push({ jobId, key, eventType: 'failed', callback, uid: uuidV4() });
+      return { job, success };
+    };
+
+    const toTry = (callback: FailedEventCallback<T>) => {
+      this.list.push({ jobId, key, eventType: 'trying', callback, uid: uuidV4() });
+      return { job, failed, success };
+    };
+
+    const add = async () => {
+      const job = await this.queue.add(key, data, { ...jobOptions });
+      return job;
+    };
+
+    return { try: toTry, failed, success, add };
   }
 
   async destroy() {

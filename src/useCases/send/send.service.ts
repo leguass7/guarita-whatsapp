@@ -89,11 +89,26 @@ export class SendService {
 
     const priority = this.getPriority(to);
 
-    const job = await this.maxbotJob
-      .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
-      .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
-      .onSuccess('SendMaxbotText', this.processSuccess(save, log))
-      .add('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true });
+    const job = (
+      await this.maxbotJob.push(
+        'SendMaxbotText',
+        { token, to, text },
+        { priority, removeOnComplete: true },
+      )
+    )
+      .try()
+      .failed()
+      .success();
+    // .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
+    // .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
+    // .onSuccess('SendMaxbotText', this.processSuccess(save, log))
+    // .add('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true });
+
+    // const job = await this.maxbotJob
+    //   .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
+    //   .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
+    //   .onSuccess('SendMaxbotText', this.processSuccess(save, log))
+    //   .add('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true });
 
     return job;
   }

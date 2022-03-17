@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { env } from '#/config';
-import { logging } from '#/services/logger';
+import { logError, logging } from '#/services/logger';
 import { QueueService } from '#/services/QueueService';
 
 import { defaultJobOptions, createSendLogJob, sendLogJobBody } from './job/send-log.job';
@@ -23,9 +23,15 @@ const sendLogsQueue = new QueueService('SENDLOGS_QUEUE', [createSendLogJob(sendL
 });
 
 sendLogsQueue
-  .onSuccess('SendFailures', ({ data }) =>
-    logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`),
-  )
+  .onTryFailed('SendFailures', ({ data, failedReason }) => {
+    logError(`SendFailures TRYING`, failedReason, data.startedIn);
+  })
+  .onFailed('SendFailures', ({ data, failedReason }) => {
+    logError(`SendFailures ERROR`, failedReason, data.startedIn);
+  })
+  .onSuccess('SendFailures', ({ data }) => {
+    logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
+  })
   .add(
     'SendFailures',
     { startedIn: new Date() },
