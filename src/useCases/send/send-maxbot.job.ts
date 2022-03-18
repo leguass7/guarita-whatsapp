@@ -1,8 +1,8 @@
 import type { Job, JobOptions } from 'bull';
 
-import { MaxbotException } from '#/app/exceptions/MaxbotException';
 import { logError } from '#/services/logger';
-import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
+import { MaxbotService, ISendTextResult } from '#/services/MaxbotService/index.ts';
+import { MaxbotException } from '#/services/MaxbotService/maxbot-exception';
 import { QueueService, IJob } from '#/services/QueueService';
 
 export type SendMaxbotPayload = {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { MaxbotService } from '#/services/maxbot.service';
+import { MaxbotService } from '#/services/MaxbotService/index.ts';
 
 import { ContactService } from './contact.service';
 

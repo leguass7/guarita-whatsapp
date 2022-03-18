@@ -12,7 +12,7 @@ export function LogClass(target: any) {
     // return  original.apply(this, args);
     const r = new original(...args);
 
-    const name = r?.queueName || r?.prefix || r?.name;
+    const name = r?.queueName || r?.provider || r?.prefix || r?.name;
     if (isDevMode) logDev('New: ' + original.name, name);
 
     return r; // according the comments

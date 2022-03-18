@@ -34,12 +34,14 @@ export class SendService {
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
     return async (
-      { attemptsMade, failedReason: message = '', id }: Job,
+      { attemptsMade: attempt, failedReason: message = '', id }: Job,
       { response = '' }: any,
     ) => {
       const jobId = id ? `${id}` : null;
-      const toAttemptsMade = attemptsMade || -1;
-      const has = await this.sendLogService.findOne({ jobId, attemptsMade: toAttemptsMade });
+      const attemptsMade = attempt || -1;
+      const { eventType } = data;
+
+      const has = await this.sendLogService.findOne({ jobId, attemptsMade, eventType });
       if (has) return has;
 
       const created = await this.sendLogService.create({

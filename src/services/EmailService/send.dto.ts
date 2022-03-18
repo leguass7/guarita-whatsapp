@@ -9,7 +9,8 @@ export interface SendPayloadDto extends Omit<SenderPayload, 'from'> {
   from?: string;
 }
 
-export interface EmailServiceResponse extends Record<any, any> {
-  method: 'smtp' | 'sendgrid';
+export type MailServiceProvider = 'smtp' | 'sendgrid';
+export interface EmailServiceResponseDto extends Record<any, any> {
+  method: MailServiceProvider;
 }
-export type EmailServiceSender = (payload: SenderPayload) => Promise<EmailServiceResponse>;
+export type EmailServiceSender = (payload: SenderPayload) => Promise<EmailServiceResponseDto>;
