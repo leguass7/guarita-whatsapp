@@ -1,43 +1,48 @@
 import { CompletedEventCallback, FailedEventCallback, JobOptions, Queue } from 'bull';
-interface QueueWorkerOptions<K extends string = any, T = any> {
-  jobName: K;
-  data?: T;
-  jobOptions?: JobOptions;
+
+import { logging } from '../logger';
+
+export interface QueueWorkerCallback<T = any> {
+  success?: [CompletedEventCallback<T>, boolean];
+  trying?: [FailedEventCallback<T>, boolean];
+  failed?: [FailedEventCallback<T>, boolean];
 }
-type ProcessType = 'success' | 'trying' | 'failed';
 
-export class QueueWorker<T = any> {
-  public jobId: string | number;
-  private cbSuccess: CompletedEventCallback<T>;
-  private cbTrying: FailedEventCallback<T>;
-  private cbFailed: FailedEventCallback<T>;
-  constructor(private queue: Queue, private options: QueueWorkerOptions) {}
+export type ProcessType = keyof QueueWorkerCallback;
 
-  public success(callback?: CompletedEventCallback<T>) {
-    this.cbSuccess = callback;
+export type JobId = string | number;
+
+export class QueueWorker<T = any, K extends string = any> {
+  public jobId: JobId;
+  public queueWorkerCallback: QueueWorkerCallback;
+
+  constructor(private queue: Queue, private jobName: K) {
+    this.queueWorkerCallback = {};
+  }
+
+  public success(callback?: CompletedEventCallback<T>, removeWorkerAfter?: boolean) {
+    this.queueWorkerCallback.success = [callback, !!removeWorkerAfter];
     return this;
   }
 
-  public trying(callback?: FailedEventCallback<T>) {
-    this.cbTrying = callback;
+  public trying(callback?: FailedEventCallback<T>, removeWorkerAfter?: boolean) {
+    this.queueWorkerCallback.trying = [callback, !!removeWorkerAfter];
     return this;
   }
 
-  public failed(callback?: FailedEventCallback<T>) {
-    this.cbFailed = callback;
+  public failed(callback?: FailedEventCallback<T>, removeWorkerAfter?: boolean) {
+    this.queueWorkerCallback.failed = [callback, !!removeWorkerAfter];
     return this;
   }
 
-  public async save() {
-    const { jobName, data = {}, jobOptions = {} } = this.options;
-    const job = await this.queue.add(jobName, data, jobOptions);
+  public async save(data?: T, jobOptions: JobOptions = {}) {
+    const job = await this.queue.add(this.jobName, data, { ...jobOptions });
+    logging('QueueWorker job adicionado', job.name);
     this.jobId = job?.id;
     return job;
   }
 
-  public processor(type: ProcessType) {
-    if (type === 'trying') return this.cbTrying;
-    if (type === 'failed') return this.cbFailed;
-    if (type === 'success') return this.cbSuccess;
+  public processor<P extends ProcessType>(type: P): QueueWorkerCallback[P] {
+    return this.queueWorkerCallback[type];
   }
 }

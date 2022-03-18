@@ -38,15 +38,17 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     // return { status: 1, msg: 'test' };
 
     const maxbot = new MaxbotService({ token, timeout: 10000 });
-    const isReady = await maxbot.getStatus();
 
-    if (!isReady && attemptsMade > 1) {
-      logError(`SendMaxbotText is not ready ${to}`);
-      throw new MaxbotException(`SendMaxbotText is not ready ${to}`, {
-        getStatus: true,
-        status: 0,
-        msg: `Failure`,
-      });
+    if (attemptsMade > 1) {
+      const isReady = await maxbot.getStatus();
+      if (!isReady) {
+        logError(`SendMaxbotText is not ready ${to}`);
+        throw new MaxbotException(`SendMaxbotText is not ready ${to}`, {
+          getStatus: true,
+          status: 0,
+          msg: `Failure`,
+        });
+      }
     }
 
     const response = await maxbot.sendText({ whatsapp: to }, text);
