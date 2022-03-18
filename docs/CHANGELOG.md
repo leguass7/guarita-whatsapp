@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 1.0.7 (2022-03-18)
+
+
+### Features
+
+* adicionado email do joaquim ([3517b9d](https://github.com/leguass7/guarita-whatsapp/commit/3517b9d9b2db6ea49cd00f490620c52e410428ce))
+* adicionado envio de e-mail ([09469dc](https://github.com/leguass7/guarita-whatsapp/commit/09469dcacebf834461db9f13c7f2087a0923feb5))
+* adicionado fila de envio de logs ([a4ee471](https://github.com/leguass7/guarita-whatsapp/commit/a4ee471d9378052b4aef587a390bd34c7c0241c4))
+* adicionado log de erro ([3a6c99d](https://github.com/leguass7/guarita-whatsapp/commit/3a6c99d5bdb5ac998a90e86fcd2739ea5c18b76f))
+* adicionado prioriry e prefix ([2426f91](https://github.com/leguass7/guarita-whatsapp/commit/2426f918576714206906b73a4dea95cf9f43944f))
+* adicionado rate limit ([fa476b6](https://github.com/leguass7/guarita-whatsapp/commit/fa476b603474abde7fcae0456c17dffcd349b088))
+* adicionado rate limit ([7b475d5](https://github.com/leguass7/guarita-whatsapp/commit/7b475d5a9de014f15cdaea70dad974893c494688))
+* adicionado tipo de evento ao log ([77f6c2f](https://github.com/leguass7/guarita-whatsapp/commit/77f6c2f98bd54839777c75341601542798300cac))
+* ajuste do ratelimit e tentativas de envio ([cc95cf4](https://github.com/leguass7/guarita-whatsapp/commit/cc95cf446c59c2a99e89c7e5c60a108892b4ed6a))
+* cron variavel ([45ca386](https://github.com/leguass7/guarita-whatsapp/commit/45ca386ad047f9a41db0977ec051609db308c491))
+* cron variavel ([d789dee](https://github.com/leguass7/guarita-whatsapp/commit/d789dee7ce19b5ad809ae8fef78edb840941530d))
+* first commit ([4e869da](https://github.com/leguass7/guarita-whatsapp/commit/4e869da8750ba0eed4f34904e46515f0ea2a4930))
+* **notWorking:** adicionado ratelinit DOWN ([bf4790a](https://github.com/leguass7/guarita-whatsapp/commit/bf4790a55ad849109b00f4ea377a23d34564996f))
+* **send:** adicionado envio de imagem ([67fe481](https://github.com/leguass7/guarita-whatsapp/commit/67fe48123d78afc2633b35f0d4ab57ab7e8d360a))
+* tentando nova queue ([b276d68](https://github.com/leguass7/guarita-whatsapp/commit/b276d68ee7cbc779f9641f67186efe0b73ba51ee))
+* tentando nova queue ([c33b78a](https://github.com/leguass7/guarita-whatsapp/commit/c33b78a420ee8cbb1d2adf3e86697988fe506423))
+
+
+### Bug Fixes
+
+* ajuste backoff.delay ([f8a01c9](https://github.com/leguass7/guarita-whatsapp/commit/f8a01c9be4459659b774f9b57a77e43d4f0c4c14))
+* ajuste de email ([a69e0ae](https://github.com/leguass7/guarita-whatsapp/commit/a69e0aea33207b7b474637e655d520d215326db1))
+* ajuste de fila ([94b63a9](https://github.com/leguass7/guarita-whatsapp/commit/94b63a9b8a6d93e77689edb7db929e789eeb2194))
+* host redis ([453e31c](https://github.com/leguass7/guarita-whatsapp/commit/453e31cc60ed922d9dc73a6df870f9a630780274))
+
 ### 1.0.6 (2022-03-16)
 
 
