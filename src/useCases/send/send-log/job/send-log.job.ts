@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
 
-import { isDevMode } from '#/config';
+import { env, isDevMode } from '#/config';
 import { MailService } from '#/services/EmailService';
+import { logError, logging } from '#/services/logger';
 import type { IJob, QueueService, JobOptions } from '#/services/QueueService';
 
 import { SendLogService } from '../send-log.service';
@@ -37,7 +38,7 @@ export function createSendLogJob(
       const txtDate = format(date, 'dd/MM/yyyy');
 
       const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${
-        isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''
+        !isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''
       }`;
 
       const mailService = new MailService('smtp');
@@ -73,3 +74,22 @@ export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
     return sent;
   },
 };
+
+export async function repeatRegister(queue: QueueService<SendLogJobNames, SendLogPayload>) {
+  const job = await queue
+    .setWorker('SendFailures')
+    .trying(({ data, failedReason }) => {
+      logError(`SendFailures TRYING`, failedReason, data.startedIn);
+    })
+    .failed(({ data, failedReason }) => {
+      logError(`SendFailures ERROR`, failedReason, data.startedIn);
+    })
+    .success(({ data }) => {
+      logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
+    })
+    .save(
+      { startedIn: new Date() },
+      { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true },
+    );
+  logging('repeatRegister', job.name, job.id);
+}
