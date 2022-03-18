@@ -4,7 +4,7 @@ import { FindConditions, FindManyOptions, getRepository, In, Like } from 'typeor
 import { isDevMode } from '#/config';
 import { makeArray } from '#/helpers/array';
 import { isDefined } from '#/helpers/validation';
-import { logging } from '#/services/logger';
+import { logError, logging } from '#/services/logger';
 
 import type { SendLogPayloadBody, SendLogsQueue } from './job/send-log.job';
 import type { CreateSendLog, FilterSendLogDto } from './send-log.dto';
@@ -38,6 +38,12 @@ export class SendLogService {
     return result;
   }
 
+  async findOne(where: FindConditions<SendLog>) {
+    const repository = getRepository(SendLog);
+    const result = await repository.findOne({ where });
+    return result;
+  }
+
   async sendBody(date: Date) {
     const logs = await this.findByDate(date);
     const failedList = logs.filter(f => f.eventType === 'failed');
@@ -56,10 +62,15 @@ export class SendLogService {
     };
 
     const job = await this.sendLogsBodyQueue
-      .onSuccess('SendLogBody', () => logging('ENVIADO SendLogBody'))
-      .onTryFailed('SendLogBody', () => logging('TENTANDO '))
-      .onFailed('SendLogBody', () => logging('FALHOU '))
-      .add('SendLogBody', payload, { removeOnComplete: true });
+      .setWorker('SendLogBody')
+      .trying(
+        ({ failedReason, attemptsMade }) =>
+          logError('SendLogService TENTANDO:', attemptsMade, failedReason),
+        true,
+      )
+      .failed(({ failedReason }) => logError('SendLogService FALHOU:', failedReason), true)
+      .success(() => logging('SendLogService ENVIADO SendLogBody:', subject), true)
+      .save(payload, { removeOnComplete: true, removeOnFail: true });
     return job;
   }
 }

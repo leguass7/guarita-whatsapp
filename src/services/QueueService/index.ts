@@ -1,28 +1,18 @@
-import Bull, {
-  QueueOptions,
-  Queue,
-  JobOptions,
-  ProcessCallbackFunction,
-  Job,
-  FailedEventCallback,
-  CompletedEventCallback,
-} from 'bull';
+import Bull, { QueueOptions, Queue, JobOptions, ProcessCallbackFunction, Job } from 'bull';
 import { v4 as uuidV4 } from 'uuid';
 
 import { redisConfig } from '#/config/redis';
 
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
+import { QueueWorker, ProcessType } from './QueueWorker';
 
 export type { JobOptions };
 
-type EventType = 'success' | 'failed' | 'trying';
-
-type EventItem<T = any> = {
+type WorkerItem<T = any> = {
+  worker: QueueWorker<T>;
   uid: string;
-  eventType: EventType;
-  key: string;
-  callback: FailedEventCallback<T> | CompletedEventCallback<T>;
+  jobName: string;
 };
 
 export interface IJob<K extends string = any, J = any> {
@@ -34,7 +24,8 @@ export interface IJob<K extends string = any, J = any> {
 
 @LogClass
 export class QueueService<K extends string = any, T = any> {
-  private eventList: EventItem<T>[];
+  private workers: WorkerItem<T>[];
+  private starters: ((q: QueueService<K, T>) => void)[];
   public queue: Queue;
 
   constructor(
@@ -42,32 +33,66 @@ export class QueueService<K extends string = any, T = any> {
     public jobs: IJob<K, T>[],
     queueOptions: QueueOptions = {},
   ) {
-    this.eventList = [];
+    this.workers = [];
+    this.starters = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
   }
 
+  private register() {
+    this.starters = this.starters
+      .map(cb => {
+        if (cb) cb(this);
+        return null;
+      })
+      .filter(f => !!f);
+  }
+
+  private async processEvents(
+    eventType: ProcessType,
+    job: Job,
+    payload: Error | any,
+    attemptsRest = 0,
+  ): Promise<void> {
+    let removeUid = '';
+
+    const processWorker = this.workers.find(({ worker, jobName }) => {
+      return !!(jobName === job.name && worker.jobId === job.id);
+    });
+
+    if (processWorker) {
+      const [callback, removeMe] = processWorker.worker.processor(eventType);
+      try {
+        if (callback) callback(job, payload);
+      } finally {
+        if (removeMe) removeUid = processWorker.uid;
+      }
+    }
+
+    const remove = !!(eventType !== 'trying' || (eventType === 'trying' && attemptsRest <= 1));
+    if (removeUid && remove) this.removeWorker(removeUid);
+  }
+
   public log(message: string, type: 'error' | 'info' = 'error') {
-    LoggerJobs[type](`QueueService ${message}`);
-  }
-
-  public onTryFailed(key: K, callback: FailedEventCallback<T>) {
-    this.eventList.push({ key, eventType: 'trying', callback, uid: uuidV4() });
-    return this;
-  }
-
-  public onFailed(key: K, callback: FailedEventCallback<T>) {
-    this.eventList.push({ key, eventType: 'failed', callback, uid: uuidV4() });
-    return this;
-  }
-
-  public onSuccess(key: K, callback: CompletedEventCallback<T>) {
-    this.eventList.push({ key, eventType: 'success', callback, uid: uuidV4() });
-    return this;
+    LoggerJobs[type](`QueueService ${this.queueName} ${message}`);
   }
 
   async add(jobName: K, data: T, jobOptions: JobOptions = {}): Promise<Job<T>> {
     const job = await this.queue.add(jobName, data, { ...jobOptions });
     return job;
+  }
+
+  public removeWorker(workerId: string) {
+    this.workers = this.workers.filter(f => f.uid !== workerId);
+  }
+
+  public setWorker(jobName: K) {
+    const worker = new QueueWorker<T, K>(this.queue, jobName);
+    this.workers.push({ uid: uuidV4(), jobName, worker });
+    return worker;
+  }
+
+  public onInit(callback: (q: this) => void) {
+    this.starters.push(callback);
   }
 
   async destroy() {
@@ -80,54 +105,29 @@ export class QueueService<K extends string = any, T = any> {
     }
   }
 
-  public process() {
-    const processEvents = async (
-      eventType: EventType,
-      job: Job,
-      payload: Error | any,
-      attemptsRest = 0,
-    ): Promise<void> => {
-      const processList = this.eventList.filter(
-        f => f.key === job.name && f.eventType === eventType,
-      );
-
-      const remove = !!(eventType !== 'trying' || (eventType === 'trying' && attemptsRest <= 1));
-
-      processList.forEach(itemJob => {
-        try {
-          itemJob?.callback(job, payload);
-          if (remove) this.eventList = this.eventList.filter(f => f.uid !== itemJob.uid);
-        } catch (error) {
-          this.log(
-            `processEvents ${this.queueName}:
-            ${eventType}:${job.name}:${job?.id} error:${job?.failedReason || error?.message}`,
-          );
-        }
-      });
-    };
+  public async process() {
+    this.queue.on('completed', async (job, result) => {
+      this.log(`${this.queueName} ${job.name}:${job?.id} complete`, 'info');
+      this.processEvents('success', job, result);
+    });
 
     this.queue.on('failed', async (job, err) => {
-      const attempts = Number(job.opts?.attempts) || 0;
-      const attemptsMade = Number(job?.attemptsMade) || 0;
+      const attempts = Number(job.opts?.attempts || 0) || 0;
+      const attemptsMade = Number(job?.attemptsMade || 0) || 0;
 
       if (attemptsMade >= attempts) {
         this.log(`${this.queueName} ${job.name}:${job?.id} failed:${job?.failedReason}`);
-        processEvents('failed', job, err);
+        this.processEvents('failed', job, err);
       } else {
         this.log(`${this.queueName} ${job.name}:${job?.id} trying:${attemptsMade}`, 'info');
-        processEvents('trying', job, err, attempts - attemptsMade);
+        this.processEvents('trying', job, err, attempts - attemptsMade);
       }
     });
 
-    this.queue.on('completed', async (job, result) => {
-      this.log(`${this.queueName} ${job.name}:${job?.id} complete`, 'info');
-      processEvents('success', job, result);
+    this.jobs.forEach(async jobItem => {
+      this.queue.process(jobItem.name, 1, jobItem.handle);
     });
 
-    return Promise.all(
-      this.jobs.map(async jobItem => {
-        return this.queue.process(jobItem.name, 1, jobItem.handle);
-      }),
-    );
+    this.register();
   }
 }

@@ -7,9 +7,15 @@ export function LogClass(target: any) {
 
   // the new constructor behaviour
   const f: any = function (...args: any[]) {
-    if (isDevMode) logDev('New: ' + original.name);
-    //return  original.apply(this, args);
-    return new original(...args); // according the comments
+    //console.log(args[0] && args[0]?.queueName);
+
+    // return  original.apply(this, args);
+    const r = new original(...args);
+
+    const name = r?.queueName || r?.prefix || r?.name;
+    if (isDevMode) logDev('New: ' + original.name, name);
+
+    return r; // according the comments
   };
 
   // copy prototype so intanceof operator still works

@@ -37,7 +37,11 @@ export class SendService {
       { attemptsMade, failedReason: message = '', id }: Job,
       { response = '' }: any,
     ) => {
-      //
+      const jobId = id ? `${id}` : null;
+      const toAttemptsMade = attemptsMade || -1;
+      const has = await this.sendLogService.findOne({ jobId, attemptsMade: toAttemptsMade });
+      if (has) return has;
+
       const created = await this.sendLogService.create({
         ...data,
         status: false,
@@ -45,7 +49,7 @@ export class SendService {
         response,
         createdAt: new Date(),
         attemptsMade: attemptsMade || -1,
-        jobId: id ? `${id}` : null,
+        jobId,
       });
       if (log && typeof log === 'function') log(created.id);
       logError(`SendService processFailed type=${data?.eventType} to=${data.to} ${message}`);
@@ -83,18 +87,16 @@ export class SendService {
       eventType: 'success',
     };
 
-    const log: LogCallback = _logId => {
-      logging('Mensagem enviada', to, _logId);
-    };
+    const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
 
     const priority = this.getPriority(to);
 
     const job = await this.maxbotJob
-      .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
-      .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
-      .onSuccess('SendMaxbotText', this.processSuccess(save, log))
-      .add('SendMaxbotText', { token, to, text }, { priority, removeOnComplete: true });
-
+      .setWorker('SendMaxbotText')
+      .trying(this.processFailed({ ...save, eventType: 'trying' }), true)
+      .failed(this.processFailed({ ...save, eventType: 'failed' }), true)
+      .success(this.processSuccess(save, log), true)
+      .save({ token, to, text }, { priority, removeOnComplete: true });
     return job;
   }
 
@@ -110,18 +112,15 @@ export class SendService {
       scheduled: new Date(),
     };
 
-    const log: LogCallback = _logId => {
-      // logging('Imagem enviada', to, url, logId)
-    };
+    const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
 
     const priority = this.getPriority(to);
-
     const job = await this.maxbotJob
-      .onTryFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'trying' }))
-      .onFailed('SendMaxbotText', this.processFailed({ ...save, eventType: 'failed' }))
-      .onSuccess('SendMaxbotText', this.processSuccess(save, log))
-      .add('SendMaxbotText', { token, to, url }, { priority, removeOnComplete: true });
-
+      .setWorker('SendMaxbotText')
+      .trying(this.processFailed({ ...save, eventType: 'trying' }))
+      .failed(this.processFailed({ ...save, eventType: 'failed' }), true)
+      .success(this.processSuccess(save, log), true)
+      .save({ token, to, url }, { priority, removeOnComplete: true });
     return job;
   }
 }
