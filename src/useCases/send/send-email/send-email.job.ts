@@ -22,7 +22,7 @@ export type SendEmailQueueService = QueueService<JobNames, SendContingencyEmailP
 export const sendContingencyEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
   name: 'SendContingencyEmailJob',
   async handle({ data }) {
-    const { email: to, text } = data;
+    const { email: to, text, subject } = data;
 
     const mailService = new MailService('smtp');
 
