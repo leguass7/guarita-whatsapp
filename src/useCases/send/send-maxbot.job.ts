@@ -34,9 +34,6 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
   async handle({ data, attemptsMade }) {
     const { token, to, text } = data;
 
-    // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
-    // return { status: 1, msg: 'test' };
-
     const maxbot = new MaxbotService({ token, timeout: 10000 });
 
     if (attemptsMade > 1) {

@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Index,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
+
+import { EmailSent } from '#/useCases/email/email-sent/email-sent.entity';
 
 export type EnventType = 'success' | 'failed' | 'trying';
 @Entity('send-logs')
@@ -55,4 +64,7 @@ export class SendLog {
 
   @Column({ type: 'json', nullable: true })
   response?: any;
+
+  @OneToMany(() => EmailSent, emailSent => emailSent.sendLogs)
+  emails: EmailSent[];
 }

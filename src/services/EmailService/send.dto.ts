@@ -14,3 +14,18 @@ export interface EmailServiceResponseDto extends Record<any, any> {
   method: MailServiceProvider;
 }
 export type EmailServiceSender = (payload: SenderPayload) => Promise<EmailServiceResponseDto>;
+
+export interface SmtpResponseDto {
+  accepted: string[];
+  rejected: string[];
+  envelopeTime: number;
+  messageTime: number;
+  messageSize: number;
+  response: string;
+  envelope: {
+    from: string;
+    to: string[];
+  };
+  messageId: string;
+  method: MailServiceProvider;
+}

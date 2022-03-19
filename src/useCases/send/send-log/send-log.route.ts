@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { prefix } from '#/config';
 import { QueueService } from '#/services/QueueService';
 
 import {
@@ -11,8 +12,6 @@ import {
 import { SendLogController } from './send-log.controller';
 import { SendLogService } from './send-log.service';
 import { getSendNowSchema } from './send-log.validation';
-
-const prefix = 'GUARITA_WHATSAPP';
 
 const sendLogsBodyQueue = new QueueService('SENDLOGSBODY_QUEUE', [sendLogJobBody], {
   defaultJobOptions,

@@ -4,6 +4,7 @@ import { authMiddleware } from '#/useCases/auth/auth.middleware';
 
 import { AuthRoute } from './auth/auth.route';
 import { ContactRoute } from './contact/contact.route';
+import { EmailRoute } from './email';
 import { SendRoute } from './send/send.route';
 import { TokenRoute } from './token/token.route';
 
@@ -14,6 +15,7 @@ IndexRoute.get('/healthz', (req, res) => {
 });
 
 IndexRoute.use('/auth', AuthRoute);
+IndexRoute.use('/email', EmailRoute);
 
 IndexRoute.use(authMiddleware);
 IndexRoute.use('/token', TokenRoute);
