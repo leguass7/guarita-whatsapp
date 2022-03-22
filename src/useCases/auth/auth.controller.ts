@@ -9,11 +9,7 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  async authorize(
-    req: IRequestAuthorize,
-    res: Response<IResponseAuthorize>,
-    _next: NextFunction,
-  ): Promise<any> {
+  async authorize(req: IRequestAuthorize, res: Response<IResponseAuthorize>, _next: NextFunction): Promise<any> {
     const { body, auth } = req;
     const { maxbotToken } = body;
     const token = await this.authService.generateToken({ maxbotToken });

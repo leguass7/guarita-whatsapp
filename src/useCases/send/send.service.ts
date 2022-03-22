@@ -1,4 +1,5 @@
 import type { CompletedEventCallback, FailedEventCallback, Job } from 'bull';
+import { createHash } from 'crypto';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
 import { CacheService } from '#/services/ChacheService';
@@ -15,11 +16,13 @@ export type SendServiceJobScheluer = (payload: SendMaxbotPayload) => Promise<Job
 
 @LogClass
 export class SendService {
-  constructor(
-    private maxbotJob: SendQueueService,
-    private sendLogService: SendLogService,
-    private cacheService: CacheService,
-  ) {}
+  constructor(private maxbotJob: SendQueueService, private sendLogService: SendLogService, private cacheService: CacheService) {}
+
+  private getCacheKey(to: string, data: string): string {
+    const payload = `${to}-${data}`;
+    const hash = createHash('md5').update(payload).digest('hex');
+    return `${to}-${hash}`;
+  }
 
   public getPriority(to: string) {
     const key = `to-${to}`;
@@ -33,10 +36,7 @@ export class SendService {
   }
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
-    return async (
-      { attemptsMade: attempt, failedReason: message = '', id }: Job,
-      { response = '' }: any,
-    ) => {
+    return async ({ attemptsMade: attempt, failedReason: message = '', id }: Job, { response = '' }: any) => {
       const jobId = id ? `${id}` : null;
       const attemptsMade = attempt || -1;
       const { eventType } = data;
@@ -91,7 +91,8 @@ export class SendService {
 
     const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
 
-    const priority = this.getPriority(to);
+    const key = this.getCacheKey(to, text);
+    const priority = this.getPriority(key);
 
     const job = await this.maxbotJob
       .setWorker('SendMaxbotText')
@@ -116,7 +117,9 @@ export class SendService {
 
     const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
 
-    const priority = this.getPriority(to);
+    const key = this.getCacheKey(to, url);
+    const priority = this.getPriority(key);
+
     const job = await this.maxbotJob
       .setWorker('SendMaxbotText')
       .trying(this.processFailed({ ...save, eventType: 'trying' }))

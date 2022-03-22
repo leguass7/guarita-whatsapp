@@ -8,14 +8,10 @@ import { SendEmailController } from './send-email.controller';
 import { defaultJobOptions, sendContingencyEmailJob, sendGeneralEmailJob } from './send-email.job';
 import { SendEmailService } from './send-email.service';
 
-const sendEmailQueue = new QueueService(
-  'SEND_EMAIL_QUEUE',
-  [sendContingencyEmailJob, sendGeneralEmailJob],
-  {
-    defaultJobOptions,
-    prefix: prefix,
-  },
-);
+const sendEmailQueue = new QueueService('SEND_EMAIL_QUEUE', [sendContingencyEmailJob, sendGeneralEmailJob], {
+  defaultJobOptions,
+  prefix: prefix,
+});
 
 const sendEmailService = new SendEmailService(emailSentService, sendEmailQueue);
 const controller = new SendEmailController(sendEmailService);

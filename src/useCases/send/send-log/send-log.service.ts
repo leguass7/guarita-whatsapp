@@ -63,11 +63,7 @@ export class SendLogService {
 
     const job = await this.sendLogsBodyQueue
       .setWorker('SendLogBody')
-      .trying(
-        ({ failedReason, attemptsMade }) =>
-          logError('SendLogService TENTANDO:', attemptsMade, failedReason),
-        true,
-      )
+      .trying(({ failedReason, attemptsMade }) => logError('SendLogService TENTANDO:', attemptsMade, failedReason), true)
       .failed(({ failedReason }) => logError('SendLogService FALHOU:', failedReason), true)
       .success(() => logging('SendLogService ENVIADO SendLogBody:', subject), true)
       .save(payload, { removeOnComplete: true, removeOnFail: true });

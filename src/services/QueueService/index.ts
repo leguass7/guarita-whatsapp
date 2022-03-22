@@ -28,11 +28,7 @@ export class QueueService<K extends string = any, T = any> {
   private starters: ((q: QueueService<K, T>) => void)[];
   public queue: Queue;
 
-  constructor(
-    private queueName: string,
-    public jobs: IJob<K, T>[],
-    queueOptions: QueueOptions = {},
-  ) {
+  constructor(private queueName: string, public jobs: IJob<K, T>[], queueOptions: QueueOptions = {}) {
     this.workers = [];
     this.starters = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
@@ -47,12 +43,7 @@ export class QueueService<K extends string = any, T = any> {
       .filter(f => !!f);
   }
 
-  private async processEvents(
-    eventType: ProcessType,
-    job: Job,
-    payload: Error | any,
-    attemptsRest = 0,
-  ): Promise<void> {
+  private async processEvents(eventType: ProcessType, job: Job, payload: Error | any, attemptsRest = 0): Promise<void> {
     let removeUid = '';
 
     const processWorker = this.workers.find(({ worker, jobName }) => {

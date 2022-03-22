@@ -22,9 +22,7 @@ export const defaultJobOptions: JobOptions = {
   backoff: { type: 'exponential', delay: 60000 * 30 },
 };
 
-export function createSendLogJob(
-  sendLogService: SendLogService,
-): IJob<SendLogJobNames, SendLogPayload> {
+export function createSendLogJob(sendLogService: SendLogService): IJob<SendLogJobNames, SendLogPayload> {
   return {
     name: 'SendFailures',
     handle: async () => {
@@ -37,9 +35,7 @@ export function createSendLogJob(
       const successLength = logs.filter(f => f.eventType === 'success')?.length;
       const txtDate = format(date, 'dd/MM/yyyy');
 
-      const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${
-        !isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''
-      }`;
+      const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
       const mailService = new MailService('smtp');
       const sent = await mailService.send({
@@ -59,9 +55,7 @@ export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
   handle: async ({ data }) => {
     const { subject, ...rest } = data;
 
-    const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${
-      !isDevMode ? `, Joaquim <atendimento01@dessistemas.com.br>` : ''
-    }`;
+    const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `, Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
     const mailService = new MailService('smtp');
     const sent = await mailService.send({
@@ -87,9 +81,6 @@ export async function repeatRegister(queue: QueueService<SendLogJobNames, SendLo
     .success(({ data }) => {
       logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
     })
-    .save(
-      { startedIn: new Date() },
-      { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true },
-    );
+    .save({ startedIn: new Date() }, { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true });
   logging('repeatRegister', job.name, job.id);
 }

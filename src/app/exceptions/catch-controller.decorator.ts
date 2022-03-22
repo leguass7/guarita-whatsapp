@@ -28,9 +28,7 @@ export function Catch(): any {
     if (descriptor) {
       return generateDescriptor(descriptor);
     } else {
-      for (const propertyName of Reflect.ownKeys(target.prototype).filter(
-        prop => prop !== 'constructor',
-      )) {
+      for (const propertyName of Reflect.ownKeys(target.prototype).filter(prop => prop !== 'constructor')) {
         const desc = Object.getOwnPropertyDescriptor(target.prototype, propertyName);
         const isMethod = desc.value instanceof Function;
         if (!isMethod) continue;

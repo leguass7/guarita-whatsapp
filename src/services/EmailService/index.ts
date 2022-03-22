@@ -2,12 +2,7 @@ import { smtpConfig, sendgridConfig, env } from '#/config';
 
 import { LogClass } from '../logger/log-decorator';
 import { EmailException } from './email.exception';
-import {
-  EmailServiceSender,
-  SendPayloadDto,
-  EmailServiceResponseDto,
-  MailServiceProvider,
-} from './send.dto';
+import { EmailServiceSender, SendPayloadDto, EmailServiceResponseDto, MailServiceProvider } from './send.dto';
 import { createTransporterSG } from './sendgrid.provider';
 import { createTransporterSMTP } from './smtp.provider';
 
@@ -26,10 +21,7 @@ export class MailService {
   public sender: EmailServiceSender;
 
   constructor(private provider: MailServiceProvider = 'smtp') {
-    this.sender =
-      this.provider === 'smtp'
-        ? createTransporterSMTP(smtpConfig)
-        : createTransporterSG(sendgridConfig);
+    this.sender = this.provider === 'smtp' ? createTransporterSMTP(smtpConfig) : createTransporterSG(sendgridConfig);
     return this;
   }
 

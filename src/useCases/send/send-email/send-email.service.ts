@@ -6,10 +6,7 @@ import type { SendEmailQueueService } from './send-email.job';
 
 @LogClass
 export class SendEmailService {
-  constructor(
-    private emailSentService: EmailSentService,
-    private sendEmailQueue: SendEmailQueueService,
-  ) {}
+  constructor(private emailSentService: EmailSentService, private sendEmailQueue: SendEmailQueueService) {}
 
   async sendGeneral(data: SendEmailDto) {
     const job = await this.sendEmailQueue

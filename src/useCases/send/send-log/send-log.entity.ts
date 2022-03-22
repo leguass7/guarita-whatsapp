@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  Index,
-  CreateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn, OneToMany } from 'typeorm';
 
 import { EmailSent } from '#/useCases/email/email-sent/email-sent.entity';
 
@@ -66,5 +59,5 @@ export class SendLog {
   response?: any;
 
   @OneToMany(() => EmailSent, emailSent => emailSent.sendLogs)
-  emails: EmailSent[];
+  emails?: EmailSent[];
 }

@@ -63,12 +63,7 @@ function failedTable(failedList: SendLog[]): string {
 `;
 }
 
-export function buildMailBody({
-  date,
-  successLength = 0,
-  failedList = [],
-  tryingLength = 0,
-}: MailFailedBody): string {
+export function buildMailBody({ date, successLength = 0, failedList = [], tryingLength = 0 }: MailFailedBody): string {
   const title = `<h2>Relat&oacute;rio de envio de ${format(tryDate(date), 'dd/MM/yyyy')}</h2>`;
   const subtitle = `
   <p>Enviados com sucesso: <strong>${successLength}</strong><br />

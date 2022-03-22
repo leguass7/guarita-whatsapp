@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
-import { HttpException } from '#/app/exceptions/HttpException';
 
 import { SendEmailDto } from './send-email.dto';
 import type { SendEmailService } from './send-email.service';
