@@ -1,8 +1,8 @@
 import type { Job, JobOptions } from 'bull';
 
-import { MaxbotException } from '#/app/exceptions/MaxbotException';
 import { logError } from '#/services/logger';
-import { MaxbotService, ISendTextResult } from '#/services/maxbot.service';
+import { MaxbotService, ISendTextResult } from '#/services/MaxbotService/index.ts';
+import { MaxbotException } from '#/services/MaxbotService/maxbot-exception';
 import { QueueService, IJob } from '#/services/QueueService';
 
 export type SendMaxbotPayload = {
@@ -23,10 +23,11 @@ export interface QueuePayload extends Job {
 // const testing = !!(nodeEnv === 'testing');
 
 export const defaultJobOptions: JobOptions = {
-  delay: 100,
+  delay: 4050,
   attempts: 3,
   timeout: 30000,
   backoff: { type: 'exponential', delay: 60 * 8 * 1000 }, // 8 minutos
+  // backoff: { type: 'exponential', delay: 1000 },
 };
 
 export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
@@ -35,7 +36,6 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     const { token, to, text } = data;
 
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
-    // return { status: 1, msg: 'test' };
 
     const maxbot = new MaxbotService({ token, timeout: 10000 });
 
@@ -67,7 +67,7 @@ export const sendMaxbotImage: IJob<JobNames, SendMaxbotPayload> = {
   async handle({ data }) {
     const { token, to, url } = data;
 
-    // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
+    //throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
 
     const maxbot = new MaxbotService({ token, timeout: 10000 });

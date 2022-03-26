@@ -64,8 +64,11 @@ node_modules/
 # Custom
 *.pem
 *.ppk
-volumes/**/*
-!volumes/.logger
+
+./volumes/**/*
+!./volumes/assets
+!./volumes/.logger
+
 *.swp
 dist
 out

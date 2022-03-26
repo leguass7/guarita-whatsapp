@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn, OneToMany } from 'typeorm';
+
+import { EmailSent } from '#/useCases/email/email-sent/email-sent.entity';
 
 export type EnventType = 'success' | 'failed' | 'trying';
 @Entity('send-logs')
@@ -21,9 +23,11 @@ export class SendLog {
   @Column({ nullable: true, enum: ['success', 'failed', 'trying'], type: 'enum' })
   eventType?: EnventType;
 
+  @Index()
   @Column({ nullable: true })
   jobId?: string;
 
+  @Index()
   @Column({ nullable: true, default: 0 })
   attemptsMade?: number;
 
@@ -35,6 +39,7 @@ export class SendLog {
   @Column({ nullable: true })
   message?: string;
 
+  @Index()
   @Column({ type: 'datetime', nullable: true })
   scheduled?: Date;
 
@@ -55,4 +60,7 @@ export class SendLog {
 
   @Column({ type: 'json', nullable: true })
   response?: any;
+
+  @OneToMany(() => EmailSent, emailSent => emailSent.sendLog)
+  emails?: EmailSent[];
 }

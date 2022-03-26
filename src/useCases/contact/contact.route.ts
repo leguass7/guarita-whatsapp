@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { MaxbotService } from '#/services/maxbot.service';
+import { MaxbotService } from '#/services/MaxbotService/index.ts';
 
 import { ContactController } from './contact.controller';
 import { ContactService } from './contact.service';

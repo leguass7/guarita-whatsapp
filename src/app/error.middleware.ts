@@ -7,19 +7,8 @@ import { logError } from '#/services/logger';
 
 import { ApiResponseErrorDto } from './response.dto';
 
-type MiddleErrors =
-  | HttpException
-  | CelebrateError
-  | Error
-  | JsonWebTokenError
-  | NotBeforeError
-  | TokenExpiredError;
-export function errorMiddleware(
-  error: MiddleErrors,
-  _req: Request,
-  res: Response,
-  _next: NextFunction,
-) {
+type MiddleErrors = HttpException | CelebrateError | Error | JsonWebTokenError | NotBeforeError | TokenExpiredError;
+export function errorMiddleware(error: MiddleErrors, _req: Request, res: Response, _next: NextFunction) {
   const result: ApiResponseErrorDto = {
     status: 500,
     message: error?.message || 'Something went wrong ApiResponseErrorDto',
@@ -50,11 +39,7 @@ export function errorMiddleware(
     result.message = error.message || 'Something went wrong HttpException';
   }
 
-  if (
-    error instanceof NotBeforeError ||
-    error instanceof JsonWebTokenError ||
-    error instanceof TokenExpiredError
-  ) {
+  if (error instanceof NotBeforeError || error instanceof JsonWebTokenError || error instanceof TokenExpiredError) {
     result.status = 401;
     result.message = error.message || 'Token inválido';
   }

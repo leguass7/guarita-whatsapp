@@ -4,8 +4,8 @@ export { jwtConfig } from './auth';
 export { dbConfig, dbType } from './database';
 
 export { smtpConfig, sendgridConfig } from './mail';
-export { pathStatic, pathVolume, routeStatic, uploadImages } from './statics';
-
+export { pathStatic, pathVolume, routeStatic, uploadImages, emailTemplatePath, baseEmailAssets } from './statics';
+export { redisConfig, prefix } from './redis';
 //
 export const projectName = appName;
 export const projectVersion = appVersion;

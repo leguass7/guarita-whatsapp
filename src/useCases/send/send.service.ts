@@ -1,13 +1,18 @@
-import type { CompletedEventCallback, FailedEventCallback, Job } from 'bull';
+import type { CompletedEventCallback, Job } from 'bull';
+import { createHash } from 'crypto';
+import { format } from 'date-fns';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
-import { CacheService } from '#/services/ChacheService';
+import type { CacheService } from '#/services/ChacheService/cache.service';
 import { logError, logging } from '#/services/logger';
 import { LogClass } from '#/services/logger/log-decorator';
+import type { FailedPromiseCallback } from '#/services/QueueService';
 
-import { CreateSendLog } from './send-log/send-log.dto';
-import { SendLogService } from './send-log/send-log.service';
-import { SendMaxbotPayload, SendQueueService } from './send-maxbot.job';
+import type { SendEmailService } from './send-email/send-email.service';
+import type { CreateSendLog } from './send-log/send-log.dto';
+import type { SendLogService } from './send-log/send-log.service';
+import type { SendMaxbotPayload, SendQueueService } from './send-maxbot.job';
+import type { MessageMetadata } from './send.dto';
 
 type LogCallback = (logId?: string | number) => void;
 
@@ -19,7 +24,14 @@ export class SendService {
     private maxbotJob: SendQueueService,
     private sendLogService: SendLogService,
     private cacheService: CacheService,
+    private sendEmailService: SendEmailService,
   ) {}
+
+  private getCacheKey(to: string, data: string): string {
+    const payload = `${to}-${data}`;
+    const hash = createHash('md5').update(payload).digest('hex');
+    return `${to}-${hash}`;
+  }
 
   public getPriority(to: string) {
     const key = `to-${to}`;
@@ -32,15 +44,14 @@ export class SendService {
     return count;
   }
 
-  private processFailed(data: CreateSendLog, log?: LogCallback): FailedEventCallback {
-    return async (
-      { attemptsMade, failedReason: message = '', id }: Job,
-      { response = '' }: any,
-    ) => {
+  private processFailed(data: CreateSendLog, log?: LogCallback): FailedPromiseCallback<SendMaxbotPayload, string> {
+    return async ({ attemptsMade: attempt, failedReason: message = '', id }: Job, { response = '' }: any) => {
       const jobId = id ? `${id}` : null;
-      const toAttemptsMade = attemptsMade || -1;
-      const has = await this.sendLogService.findOne({ jobId, attemptsMade: toAttemptsMade });
-      if (has) return has;
+      const attemptsMade = attempt || -1;
+      const { eventType } = data;
+
+      const has = await this.sendLogService.findOne({ jobId, attemptsMade, eventType });
+      if (has) return null;
 
       const created = await this.sendLogService.create({
         ...data,
@@ -52,8 +63,8 @@ export class SendService {
         jobId,
       });
       if (log && typeof log === 'function') log(created.id);
-      logError(`SendService processFailed type=${data?.eventType} to=${data.to} ${message}`);
-      return created;
+      logError(`SendService processFailed type=${eventType} to=${data.to} ${message} created:${created?.id}`);
+      return created?.id;
     };
   }
 
@@ -75,7 +86,7 @@ export class SendService {
     };
   }
 
-  async sendMaxbotText(payload: SendMaxbotPayload) {
+  async sendMaxbotText(payload: SendMaxbotPayload, { email, forbiddenEmail, makeType }: MessageMetadata = {}) {
     const { token, to, text } = payload;
 
     const save: CreateSendLog = {
@@ -89,12 +100,21 @@ export class SendService {
 
     const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
 
-    const priority = this.getPriority(to);
+    const key = this.getCacheKey(to, text);
+    const priority = this.getPriority(key);
 
     const job = await this.maxbotJob
       .setWorker('SendMaxbotText')
       .trying(this.processFailed({ ...save, eventType: 'trying' }), true)
-      .failed(this.processFailed({ ...save, eventType: 'failed' }), true)
+      .failed((job, response) => {
+        this.processFailed({ ...save, eventType: 'failed' })(job, response).then(sendLogId => {
+          if (email && !forbiddenEmail) {
+            const date = format(new Date(), 'dd/MM/yyyy');
+            // console.log('makeType', makeType, !!forbiddenEmail, email, sendLogId);
+            this.sendEmailService.sendContingency({ email, subject: `Relatório ${date}`, text, makeType, jobId: job?.id, sendLogId, date });
+          }
+        });
+      }, true)
       .success(this.processSuccess(save, log), true)
       .save({ token, to, text }, { priority, removeOnComplete: true });
     return job;
@@ -114,7 +134,9 @@ export class SendService {
 
     const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
 
-    const priority = this.getPriority(to);
+    const key = this.getCacheKey(to, url);
+    const priority = this.getPriority(key);
+
     const job = await this.maxbotJob
       .setWorker('SendMaxbotText')
       .trying(this.processFailed({ ...save, eventType: 'trying' }))
