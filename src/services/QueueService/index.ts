@@ -5,9 +5,9 @@ import { redisConfig } from '#/config/redis';
 
 import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
-import { QueueWorker, ProcessType } from './QueueWorker';
+import { QueueWorker, ProcessType, FailedPromiseCallback } from './QueueWorker';
 
-export type { JobOptions };
+export type { JobOptions, FailedPromiseCallback };
 
 type WorkerItem<T = any> = {
   worker: QueueWorker<T>;
@@ -28,7 +28,7 @@ export class QueueService<K extends string = any, T = any> {
   private starters: ((q: QueueService<K, T>) => void)[];
   public queue: Queue;
 
-  constructor(private queueName: string, public jobs: IJob<K, T>[], queueOptions: QueueOptions = {}) {
+  constructor(private queueName: string, public jobs: IJob<K, T | unknown>[], queueOptions: QueueOptions = {}) {
     this.workers = [];
     this.starters = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });
@@ -60,7 +60,10 @@ export class QueueService<K extends string = any, T = any> {
     }
 
     const remove = !!(eventType !== 'trying' || (eventType === 'trying' && attemptsRest <= 1));
-    if (removeUid && remove) this.removeWorker(removeUid);
+    if (removeUid && remove) {
+      if (eventType === 'trying') this.removeWorker(removeUid, 'trying');
+      else this.removeWorker(removeUid);
+    }
   }
 
   public log(message: string, type: 'error' | 'info' = 'error') {
@@ -72,8 +75,13 @@ export class QueueService<K extends string = any, T = any> {
     return job;
   }
 
-  public removeWorker(workerId: string) {
-    this.workers = this.workers.filter(f => f.uid !== workerId);
+  public removeWorker(workerId: string, type?: ProcessType) {
+    if (type) {
+      const found = this.workers.find(f => f.uid === workerId);
+      if (found) found.worker.queueWorkerCallback[type] = null;
+    } else {
+      this.workers = this.workers.filter(f => f.uid !== workerId);
+    }
   }
 
   public setWorker(jobName: K) {
@@ -107,10 +115,10 @@ export class QueueService<K extends string = any, T = any> {
       const attemptsMade = Number(job?.attemptsMade || 0) || 0;
 
       if (attemptsMade >= attempts) {
-        this.log(`${this.queueName} ${job.name}:${job?.id} failed:${job?.failedReason}`);
+        this.log(`${this.queueName}:${job?.id} FAILED:${job?.failedReason}`);
         this.processEvents('failed', job, err);
       } else {
-        this.log(`${this.queueName} ${job.name}:${job?.id} trying:${attemptsMade}`, 'info');
+        this.log(`${this.queueName}:${job?.id} TRYING:${attemptsMade}`, 'info');
         this.processEvents('trying', job, err, attempts - attemptsMade);
       }
     });

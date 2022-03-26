@@ -8,6 +8,4 @@ export const redisConfig: RedisOptions = {
   password: env.REDIS_PASSWORD,
 };
 
-export const redisUri = `redis://${redisConfig.password}@${redisConfig.host}:${redisConfig.port}`;
-
 export const prefix = 'GUARITA_WHATSAPP';

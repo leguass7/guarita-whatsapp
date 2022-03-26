@@ -1,10 +1,5 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 
-// provider: "maxbot"; // apenas maxbot por enquanto
-//       contactId: string;
-//       type: "text" | "image";
-//       message?: string; // sem texto quando for imagem
-
 export const postSendSchema = celebrate(
   {
     [Segments.BODY]: {
@@ -13,10 +8,17 @@ export const postSendSchema = celebrate(
         'any.only': 'provider deve ser `maxbot`',
       }),
       type: Joi.string().valid('text', 'image').required(),
-      // .messages({ 'any.only': 'tipos permitidos `text` e `image` ' }),
       to: Joi.string().required(),
       message: Joi.string().required(),
+      metaData: Joi.object({
+        email: Joi.string().email().optional(),
+        userId: Joi.alternatives(Joi.string(), Joi.number()).allow('').optional(),
+        userName: Joi.string().allow('').optional(),
+        companyName: Joi.string().allow('').optional(),
+        forbiddenEmail: Joi.boolean().optional(),
+        makeType: Joi.string().valid('fail', 'ok').optional(),
+      }).optional(),
     },
   },
-  { allowUnknown: false, abortEarly: true },
+  { allowUnknown: true, abortEarly: true, stripUnknown: true },
 );
