@@ -29,6 +29,8 @@ export const env = {
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: Number(process.env?.REDIS_PORT) || 6379,
   REDIS_PASSWORD: process.env?.REDIS_PASSWORD || undefined,
+  //
+  VIRTUAL_HOST: process.env?.VIRTUAL_HOST || undefined,
 };
 
 export type NodeEnv = 'development' | 'production' | 'testing';

@@ -17,17 +17,16 @@ export class SendController {
 
     if (provider !== 'maxbot') throw new HttpException(503, 'Não implementado');
 
-    console.log('metaData', metaData);
-
+    let job = null;
     const payload: SendMaxbotPayload = { token: auth.maxbotToken, to };
     if (type === 'text') {
       payload.text = message;
-      this.sendService.sendMaxbotText(payload);
+      job = await this.sendService.sendMaxbotText(payload, { ...metaData });
     } else if (type === 'image') {
       payload.url = message;
-      this.sendService.sendMaxbotImage(payload);
+      job = await this.sendService.sendMaxbotImage(payload);
     }
 
-    return res.status(200).send({ success: true }).end();
+    return res.status(200).send({ success: true, jobId: job?.id }).end();
   }
 }

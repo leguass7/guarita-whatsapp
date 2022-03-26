@@ -23,9 +23,11 @@ export class SendLog {
   @Column({ nullable: true, enum: ['success', 'failed', 'trying'], type: 'enum' })
   eventType?: EnventType;
 
+  @Index()
   @Column({ nullable: true })
   jobId?: string;
 
+  @Index()
   @Column({ nullable: true, default: 0 })
   attemptsMade?: number;
 
@@ -37,6 +39,7 @@ export class SendLog {
   @Column({ nullable: true })
   message?: string;
 
+  @Index()
   @Column({ type: 'datetime', nullable: true })
   scheduled?: Date;
 
@@ -58,6 +61,6 @@ export class SendLog {
   @Column({ type: 'json', nullable: true })
   response?: any;
 
-  @OneToMany(() => EmailSent, emailSent => emailSent.sendLogs)
+  @OneToMany(() => EmailSent, emailSent => emailSent.sendLog)
   emails?: EmailSent[];
 }

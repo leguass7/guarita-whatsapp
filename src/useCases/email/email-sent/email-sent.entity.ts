@@ -10,13 +10,19 @@ export class EmailSent {
   @Column({ nullable: true })
   jobId?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   sendLogId?: string;
 
   @Column({ nullable: true, default: 0 })
   countRead?: number;
 
+  @Column({ type: 'timestamp', nullable: true, precision: null, default: () => 'CURRENT_TIMESTAMP' })
+  createdAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true, precision: null, default: null, onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt?: Date;
+
   @ManyToOne(() => SendLog, sendlog => sendlog.emails, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'sendLogId' })
-  sendLogs: SendLog;
+  sendLog: SendLog;
 }

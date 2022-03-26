@@ -1,67 +1,43 @@
-import { NotImplementedException } from '#/app/exceptions/NotImplementedException';
+// import { NotImplementedException } from '#/app/exceptions/NotImplementedException';
 import { EmailServiceResponseDto, MailService } from '#/services/EmailService';
 import { IJob, QueueService, JobOptions } from '#/services/QueueService';
 
-export type SendEmailLayoutPayload = {
-  trackImageURL: string;
-  imageLogoURL: string;
-  imageVendorURL: string;
-};
-
-export type SendContingencyEmailPayload = SendEmailLayoutPayload & {
+export type SendContingencyEmailPayload = {
   email: string;
-  subject?: string;
-  text?: string;
-  url?: string;
+  subject: string;
+  html: string;
 };
 
-export type JobNames = 'SendContingencyEmailJob' | 'sendGeneralEmailJob';
+export type SendGeneralEmailPayload = {
+  email: string;
+  subject: string;
+  text: string;
+};
 
-export type SendEmailQueueService = QueueService<JobNames, SendContingencyEmailPayload>;
+export type JobNames = 'SendHtmlEmailJob' | 'sendGeneralEmailJob';
 
-export const sendContingencyEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
-  name: 'SendContingencyEmailJob',
+export type SendEmailQueueService = QueueService<JobNames, SendContingencyEmailPayload | SendGeneralEmailPayload>;
+
+export const sendHtmlEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
+  name: 'SendHtmlEmailJob',
   async handle({ data }) {
-    const { email: to, text, subject } = data;
+    const { email: to, html, subject } = data;
 
     const mailService = new MailService('smtp');
-
-    // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
-    // return { status: 1, msg: 'test' };
-
-    // const response = await mailService.send({ to, html: text, subject: '' });
-
-    // if (response.method === 'smtp') {
-    //   logError(`SendMaxbotText status ${JSON.stringify(response)}`);
-    //   throw new EmailException(response.msg, response);
-    // }
-
-    throw new NotImplementedException();
-
-    // return response as EmailServiceResponseDto;
+    const response = await mailService.send({ to, subject, html });
+    return response?.messageId;
   },
 };
 
-export const sendGeneralEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
+export const sendGeneralEmailJob: IJob<JobNames, SendGeneralEmailPayload> = {
   name: 'sendGeneralEmailJob',
   async handle({ data }) {
     const { email: to, text, subject } = data;
 
     const mailService = new MailService('smtp');
-
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
-
     const response = await mailService.send({ to, html: text, subject });
-    console.log('response', response);
-
-    // if (response.method === 'smtp') {
-    //   logError(`SendMaxbotText status ${JSON.stringify(response)}`);
-    //   throw new EmailException(response.msg, response);
-    // }
-
-    // throw new NotImplementedException();
-
     return response as EmailServiceResponseDto;
   },
 };
