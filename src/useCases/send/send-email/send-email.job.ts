@@ -1,4 +1,4 @@
-// import { NotImplementedException } from '#/app/exceptions/NotImplementedException';
+import { isDevMode } from '#/config';
 import { EmailServiceResponseDto, MailService } from '#/services/EmailService';
 import { IJob, QueueService, JobOptions } from '#/services/QueueService';
 
@@ -24,7 +24,7 @@ export const sendHtmlEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
     const { email: to, html, subject } = data;
 
     const mailService = new MailService('smtp');
-    const response = await mailService.send({ to, subject, html });
+    const response = await mailService.send({ to, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}`, html });
     return response?.messageId;
   },
 };
@@ -37,7 +37,7 @@ export const sendGeneralEmailJob: IJob<JobNames, SendGeneralEmailPayload> = {
     const mailService = new MailService('smtp');
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
-    const response = await mailService.send({ to, html: text, subject });
+    const response = await mailService.send({ to, html: text, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}` });
     return response as EmailServiceResponseDto;
   },
 };

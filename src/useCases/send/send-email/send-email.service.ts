@@ -46,8 +46,8 @@ export class SendEmailService {
   async sendGeneral(data: SendEmailDto) {
     const job = await this.sendEmailQueue
       .setWorker('sendGeneralEmailJob')
-      .trying()
-      .failed()
+      .trying(() => null, true)
+      .failed(() => null, true)
       .success()
       .save({ ...data });
     return { job };
@@ -59,6 +59,8 @@ export class SendEmailService {
 
     const job = await this.sendEmailQueue
       .setWorker('SendHtmlEmailJob')
+      .trying(() => null, true)
+      .failed(() => null, true)
       .success(() => logging(`CONTINGENCY EMAIL: ${jobId} ${email}`), true)
       .save<SendContingencyEmailPayload>({ email, subject, html });
     return { job };
