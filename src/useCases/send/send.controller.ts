@@ -13,9 +13,11 @@ export class SendController {
 
   async sendMessage(req: RequestSendMessageDto, res: Response, _next: NextFunction) {
     const { auth, body } = req;
-    const { message, provider, type, to } = body;
+    const { message, provider, type, to, metaData } = body;
 
     if (provider !== 'maxbot') throw new HttpException(503, 'Não implementado');
+
+    console.log('metaData', metaData);
 
     const payload: SendMaxbotPayload = { token: auth.maxbotToken, to };
     if (type === 'text') {
