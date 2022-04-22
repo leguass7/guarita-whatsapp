@@ -3,6 +3,8 @@ import { createTransport } from 'nodemailer';
 import { logError } from '../logger';
 import { EmailServiceSender } from './send.dto';
 
+const cc = ['Leandro Sbrissa <leandro.sbrissa@hotmail.com>', 'Tcharly <tcharlyrocha@dessistemas.com.br>'];
+
 export interface ISmtpConfig {
   host: string;
   port: number;
@@ -20,7 +22,7 @@ export function createTransporterSMTP(config: ISmtpConfig): EmailServiceSender {
   const sender: EmailServiceSender = async ({ from, html, subject, to }) => {
     try {
       let transporter = createTransport(config);
-      const response = await transporter.sendMail({ from, to, subject, html });
+      const response = await transporter.sendMail({ from, to, cc, subject, html });
       transporter = null;
       return { ...response, method: 'smtp' };
     } catch (error) {
