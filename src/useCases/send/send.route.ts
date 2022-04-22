@@ -14,7 +14,7 @@ import { postSendSchema } from './send.validation';
 const sendMaxbotQueue = new QueueService('MAXBOT_QUEUE', [sendMaxbotMessage, sendMaxbotImage], {
   defaultJobOptions,
   prefix,
-  limiter: { max: 1, duration: 4000 },
+  limiter: { max: 1, duration: 1000 * 60 },
 });
 
 const sendService = new SendService(sendMaxbotQueue, sendLogService, cacheService, sendEmailService);
