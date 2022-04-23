@@ -7,7 +7,7 @@ import { LoggerJobs } from '../logger';
 import { LogClass } from '../logger/log-decorator';
 import { QueueWorker, ProcessType, FailedPromiseCallback } from './QueueWorker';
 
-export type { JobOptions, FailedPromiseCallback };
+export type { JobOptions, FailedPromiseCallback, QueueOptions };
 
 type WorkerItem<T = any> = {
   worker: QueueWorker<T>;
@@ -106,7 +106,7 @@ export class QueueService<K extends string = any, T = any> {
 
   public async process() {
     this.queue.on('completed', async (job, result) => {
-      this.log(`${this.queueName} ${job.name}:${job?.id} complete`, 'info');
+      this.log(`${job.name}:${job?.id} complete`, 'info');
       this.processEvents('success', job, result);
     });
 
@@ -115,10 +115,10 @@ export class QueueService<K extends string = any, T = any> {
       const attemptsMade = Number(job?.attemptsMade || 0) || 0;
 
       if (attemptsMade >= attempts) {
-        this.log(`${this.queueName}:${job?.id} FAILED:${job?.failedReason}`);
+        this.log(`${job?.id}: FAILED:${job?.failedReason}`);
         this.processEvents('failed', job, err);
       } else {
-        this.log(`${this.queueName}:${job?.id} TRYING:${attemptsMade}`, 'info');
+        this.log(`${job?.id}: TRYING:${attemptsMade}`, 'info');
         this.processEvents('trying', job, err, attempts - attemptsMade);
       }
     });

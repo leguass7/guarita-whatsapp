@@ -11,10 +11,10 @@ import { LogClass } from '../logger/log-decorator';
 
 const cors = { origin: '*' };
 
-export interface ISocketClientResponse {
+export type ISocketClientResponse<T = Record<string, any>> = T & {
   success: boolean;
   message: string;
-}
+};
 
 export interface ISocketClient {
   id: string;
@@ -78,37 +78,72 @@ export class SocketService {
       });
     });
 
-    this.io.on('received', () => {
-      //
-    });
     return this;
   }
 
-  async sendText(data: any, timeout = 3000): Promise<ISocketClientResponse> {
-    const uid = uuidV4();
-    const result: ISocketClientResponse = { success: false, message: 'timeout' };
-    if (!this.clients.length) return result;
-
-    const [client] = this.clients; // pega o primeiro client conectado
-
+  private withTimeout<T = any>(handler: () => Promise<ISocketClientResponse<T>>, timeout = 5000) {
     let t: any = null;
+
+    const result: ISocketClientResponse = { success: false, message: 'timeout' };
 
     const timer = () =>
       new Promise<ISocketClientResponse>(resolve => {
         t = setTimeout(() => {
           logError(`TIMEOUT ${timeout}ms`);
-          resolve(result);
+          resolve({ ...result, message: 'timeout' });
         }, timeout);
       });
 
     const execute = () =>
       new Promise<ISocketClientResponse>(resolve => {
-        client.socket.emit('send-text', { uid, ...data }, async (response: ISocketClientResponse) => {
+        handler().then(response => {
           resolve({ ...result, ...response });
           clearTimeout(t);
         });
       });
 
     return Promise.race([execute(), timer()]);
+  }
+
+  first() {
+    return this.clients.length ? this.clients[0] : null;
+  }
+
+  firstSocket() {
+    return this.clients.length ? this.clients[0]?.socket : null;
+  }
+
+  async getStatus() {
+    const uid = uuidV4();
+    const result: ISocketClientResponse = { success: false, message: 'client offline' };
+
+    const client = this.first();
+    if (!client) return result;
+
+    const execute = () =>
+      new Promise<ISocketClientResponse>(resolve => {
+        client.socket.emit('status', { uid }, async (response: ISocketClientResponse) => {
+          resolve({ ...result, ...response });
+        });
+      });
+
+    return this.withTimeout(execute);
+  }
+
+  async sendText(data: any): Promise<ISocketClientResponse> {
+    const uid = uuidV4();
+    const result: ISocketClientResponse = { success: false, message: 'timeout' };
+
+    const client = this.first();
+    if (!client) return result;
+
+    const execute = () =>
+      new Promise<ISocketClientResponse>(resolve => {
+        client.socket.emit('send-text', { uid, ...data }, async (response: ISocketClientResponse) => {
+          resolve({ ...result, ...response });
+        });
+      });
+
+    return this.withTimeout(execute);
   }
 }
