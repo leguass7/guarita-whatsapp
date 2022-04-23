@@ -2,8 +2,9 @@ import { AppExpress } from './app/AppExpress';
 import { httpPort, isDevMode, dbConfig, nodeEnv } from './config';
 import { createDatabase } from './database';
 import { logging } from './services/logger';
+import { socketService } from './services/socket.service';
 
-const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv });
+const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv }, socketService);
 
 export async function startServer() {
   const database = await createDatabase({

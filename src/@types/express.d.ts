@@ -8,3 +8,9 @@ declare global {
     }
   }
 }
+
+declare module 'socket.io' {
+  export interface Socket {
+    auth?: IPayloadToken;
+  }
+}

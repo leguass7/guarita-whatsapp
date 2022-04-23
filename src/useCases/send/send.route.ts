@@ -7,6 +7,7 @@ import { QueueService } from '#/services/QueueService';
 import { EmailSendRoute, sendEmailService } from './send-email/send-email.route';
 import { SendLogRoute, sendLogService } from './send-log/send-log.route';
 import { sendMaxbotMessage, sendMaxbotImage, defaultJobOptions } from './send-maxbot.job';
+import { SendSocketRoute } from './send-socket/send-socket.route';
 import { SendController } from './send.controller';
 import { SendService } from './send.service';
 import { postSendSchema } from './send.validation';
@@ -24,6 +25,7 @@ const SendRoute = Router();
 
 SendRoute.use('/email', EmailSendRoute);
 SendRoute.use('/log', SendLogRoute);
+SendRoute.use('/socket', SendSocketRoute);
 SendRoute.post('/', postSendSchema, (req, res, next) => controller.sendMessage(req, res, next));
 
 export { SendRoute, sendService, sendLogService, sendMaxbotQueue };

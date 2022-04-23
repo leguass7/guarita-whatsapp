@@ -3,10 +3,12 @@ import cors from 'cors';
 import express, { Express } from 'express';
 import useragent from 'express-useragent';
 import helmet from 'helmet';
+import { Server, createServer } from 'http';
 import morgan from 'morgan';
 import requestIp from 'request-ip';
 
 import { logError, logging } from '#/services/logger';
+import type { SocketService } from '#/services/SocketService';
 import { queues } from '#/useCases/index.job';
 import { IndexRoute } from '#/useCases/index.route';
 
@@ -23,14 +25,22 @@ export class AppExpress {
   private readonly port: number;
   public express: Express;
   private readonly env: NodeEnv;
+  private readonly server: Server;
   private started: boolean;
 
-  constructor({ port, env }: IAppOptions) {
+  constructor({ port, env }: IAppOptions, private socketService?: SocketService) {
     this.port = port;
     this.env = env;
     this.express = express();
+    this.server = createServer(this.express);
     this.started = false;
+    if (this.socketService) this.socketService.createFromExpress(this.server);
     return this;
+  }
+  private socketServer() {
+    if (this.socketService) {
+      this.socketService.init();
+    }
   }
 
   private middlewares() {
@@ -60,6 +70,8 @@ export class AppExpress {
   async start() {
     this.middlewares();
     this.routes();
+    this.socketServer();
+
     await this.startQueues();
     this.started = true;
     return this;
@@ -68,7 +80,7 @@ export class AppExpress {
   async listen() {
     try {
       if (!this.started) await this.start();
-      return this.express.listen(this.port, () => {
+      return this.server.listen(this.port, () => {
         logging(`STARTED SERVER development=${this.env}`, `PORT=${this.port}`);
       });
     } catch {
