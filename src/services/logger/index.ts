@@ -2,7 +2,7 @@ import { join } from 'path';
 import { createLogger, transports, format, addColors } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-import { isDevMode, pathVolume, projectName, projectVersion } from '#/config';
+import { pathVolume, projectName, projectVersion } from '#/config';
 
 const myFormat = format.printf(({ level, message, timestamp }) => {
   return `${timestamp} ${level}: ${message}`;
@@ -52,7 +52,7 @@ export function logError(...args: any[]) {
 }
 
 export function logDev(...args: any[]) {
-  return isDevMode && Logger.info(args.join(' '));
+  return Logger.info(args.join(' '));
 }
 
 export function logWarn(...args: any[]) {
