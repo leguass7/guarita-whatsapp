@@ -6,6 +6,6 @@ COPY . .
 
 RUN yarn install --frozen-lockfile
 
-RUN yarn build
+RUN yarn build:heap
 
 CMD ["yarn", "start"]
