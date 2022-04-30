@@ -24,10 +24,11 @@ services:
       options:
         max-size: '8m'
         max-file: '3'
-    deploy:
-      resources:
-        limits:
-          memory: 254M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 254M
+    
   # cache:
   #   env_file:
   #     - .env
