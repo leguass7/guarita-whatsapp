@@ -12,6 +12,7 @@ const controller = new ContactController(contactService, maxbotService);
 
 const ContactRoute = Router();
 
+ContactRoute.get('/google', (req, res, next) => controller.google(req, res, next));
 ContactRoute.get('/', (req, res, next) => controller.list(req, res, next));
 ContactRoute.post('/', postContactSchema, (req, res, next) => controller.create(req, res, next));
 ContactRoute.patch('/', patchContactSchema, (req, res, next) => controller.update(req, res, next));

@@ -29,4 +29,8 @@ export class ContactController {
 
     return res.status(200).send({ success: true, query, ready }).end();
   }
+
+  async google(req: Request, res: Response, _next: NextFunction): Promise<any> {
+    return res.status(200).send({ success: true }).end();
+  }
 }
