@@ -7,12 +7,13 @@
   "scripts": {
     "release": "standard-version --no-verify --skip.tag --release-as patch -a",
     "prebuild": "rimraf dist",
-    "build": "tsc -p tsconfig-build.json && tscpaths -p tsconfig-build.json -s ./src -o ./dist",
+    "build": "yarn print:heapsize && cross-env NODE_OPTIONS='--max-old-space-size=512 --heapsnapshot-near-heap-limit=3' tsc -p tsconfig-build.json && tscpaths -p tsconfig-build.json -s ./src -o ./dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only --ignore-watch node_modules --no-notify src/index.ts",
     "test": "cross-env NODE_ENV=testing jest --coverage --forceExit",
     "test:old": "echo 'not implemented'",
-    "lint": "eslint ./src --ext js --ext ts --fix"
+    "lint": "eslint ./src --ext js --ext ts --fix",
+    "print:heapsize": "node ./scripts/heapsize.js"
   },
   "standard-version": {
     "infile": "docs/CHANGELOG.md",

@@ -6,6 +6,6 @@ COPY . .
 
 RUN yarn install --frozen-lockfile
 
-RUN yarn build
+RUN export NODE_OPTIONS="--max-old-space-size=530" && yarn build
 
 CMD ["yarn", "start"]

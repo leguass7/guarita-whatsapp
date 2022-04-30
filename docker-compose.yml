@@ -54,5 +54,5 @@ volumes:
 
 networks:
   default:
-    external:
-      name: database
+    external: true
+    name: database
