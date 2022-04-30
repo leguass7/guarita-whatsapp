@@ -1,7 +1,7 @@
-import { OAuth2Client, Credentials } from 'google-auth-library';
-import { google } from 'googleapis';
+import type { Credentials } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library/build/src/auth/oauth2client';
+import { people } from 'googleapis/build/src/apis/people';
 import { resolve } from 'path';
-// import qrcode from 'qrcode-terminal';
 
 import { isDevMode } from '#/config';
 import { loadFileJSON, saveFileJSON } from '#/helpers/files';
@@ -99,7 +99,8 @@ export class GoogleService {
     if (this.credentials?.installed) {
       const { client_secret, client_id, redirect_uris } = this.credentials.installed;
       const redirectUris = isDevMode ? redirect_uris[0] : redirect_uris[1];
-      this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUris);
+      this.oAuth2Client = new OAuth2Client(client_id, client_secret, redirectUris);
+      // new google.auth.OAuth2(client_id, client_secret, redirectUris);
       //
       if (this.tokens) {
         this.oAuth2Client.setCredentials(this.tokens);
@@ -111,7 +112,7 @@ export class GoogleService {
   }
 
   async getContacts() {
-    const peopleApi = google.people({ version: 'v1', auth: this.oAuth2Client });
+    const peopleApi = people({ version: 'v1', auth: this.oAuth2Client });
     const { status, data } = await peopleApi.people.connections.list({
       resourceName: 'people/me',
       personFields: 'emailAddresses,names,phoneNumbers',

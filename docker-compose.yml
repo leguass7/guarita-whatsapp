@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     restart: always
-    container_name: guarita-whatsapp-1
+    container_name: guarita-whatsapp-prod
     build: .
     ports:
       - ${PORT}:${PORT}
@@ -24,6 +24,10 @@ services:
       options:
         max-size: '8m'
         max-file: '3'
+    deploy:
+      resources:
+        limits:
+          memory: 400M
 volumes:
   node_modules_cache:
 
