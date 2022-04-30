@@ -6,7 +6,7 @@ import qrcode from 'qrcode-terminal';
 import { isDevMode } from '#/config';
 import { loadFileJSON, saveFileJSON } from '#/helpers/files';
 
-import { logging } from '../logger';
+import { logError, logging } from '../logger';
 import { LogClass } from '../logger/log-decorator';
 
 type TokenContent = Credentials;
@@ -53,7 +53,11 @@ export class GoogleService {
     const googlePath = this.options?.credentialsPath;
     const credentialFilePath = resolve(googlePath, 'credentials.json');
     const credentials = loadFileJSON(credentialFilePath);
-    if (!credentials) throw new Error(`Credential file error ${credentialFilePath}`);
+    if (!credentials) {
+      logError(`Credential file error ${credentialFilePath}`);
+      return this;
+      // throw new Error(`Credential file error ${credentialFilePath}`);
+    }
     this.credentials = credentials;
 
     const tokenFilePath = resolve(googlePath, 'token.json');
@@ -92,15 +96,17 @@ export class GoogleService {
   }
 
   private authorize() {
-    const { client_secret, client_id, redirect_uris } = this.credentials.installed;
-    const redirectUris = isDevMode ? redirect_uris[0] : redirect_uris[1];
-    this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUris);
-    //
-    if (this.tokens) {
-      this.oAuth2Client.setCredentials(this.tokens);
-      logging('Google autorizado');
-    } else {
-      this.getAuthUrl();
+    if (this.credentials?.installed) {
+      const { client_secret, client_id, redirect_uris } = this.credentials.installed;
+      const redirectUris = isDevMode ? redirect_uris[0] : redirect_uris[1];
+      this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUris);
+      //
+      if (this.tokens) {
+        this.oAuth2Client.setCredentials(this.tokens);
+        logging('Google autorizado');
+      } else {
+        this.getAuthUrl();
+      }
     }
   }
 
