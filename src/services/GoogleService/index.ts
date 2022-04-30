@@ -1,7 +1,7 @@
 import { OAuth2Client, Credentials } from 'google-auth-library';
 import { google } from 'googleapis';
 import { resolve } from 'path';
-import qrcode from 'qrcode-terminal';
+// import qrcode from 'qrcode-terminal';
 
 import { isDevMode } from '#/config';
 import { loadFileJSON, saveFileJSON } from '#/helpers/files';
@@ -88,7 +88,7 @@ export class GoogleService {
     });
     if (authUrl) {
       this.authUrl = authUrl;
-      qrcode.generate(authUrl, { small: true });
+      // qrcode.generate(authUrl, { small: true });
       logging('Para autorizar o google visite a URL:', authUrl);
     }
 
