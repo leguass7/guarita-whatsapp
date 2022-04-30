@@ -12,3 +12,12 @@ export const postAuthSchema = celebrate(
   },
   { abortEarly: false, allowUnknown: false },
 );
+
+export const getAuthGoogleSchema = celebrate(
+  {
+    [Segments.QUERY]: {
+      code: Joi.string().required(),
+    },
+  },
+  { abortEarly: false, allowUnknown: true },
+);

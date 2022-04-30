@@ -1,8 +1,10 @@
 import { Router } from 'express';
 
+import { googleService } from '#/services/google.service';
+
 import { ContactGoogleController } from './contact-google.controller';
 
-const controller = new ContactGoogleController();
+const controller = new ContactGoogleController(googleService);
 
 const ContactGoogleRoute = Router();
 
