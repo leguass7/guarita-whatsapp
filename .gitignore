@@ -69,6 +69,8 @@ node_modules/
 !./volumes/assets
 !./volumes/.logger
 
+volumes/google/**/*
+
 *.swp
 dist
 out
