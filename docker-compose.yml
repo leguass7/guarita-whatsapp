@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     restart: always
-    container_name: guarita-whatsapp
+    container_name: guarita-whatsapp-1
     build: .
     ports:
       - ${PORT}:${PORT}
