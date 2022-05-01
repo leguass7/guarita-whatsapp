@@ -1,7 +1,21 @@
 import type { people_v1 } from 'googleapis/build/src/apis/people/v1';
 
+export interface CredentialContent {
+  installed: {
+    client_id: string;
+    project_id: string;
+    auth_uri: string;
+    token_uri: string;
+    auth_provider_x509_cert_url: string;
+    client_secret: string;
+    redirect_uris: string[];
+  };
+}
+
+// Contact People
 export type PersonType = people_v1.Schema$Person;
 export type FieldMetadataType = people_v1.Schema$FieldMetadata;
+export type ListParamsType = people_v1.Params$Resource$People$Connections$List;
 
 export interface IGoogleContact {
   resourceName: string;
@@ -10,6 +24,12 @@ export interface IGoogleContact {
   email?: string;
   type?: string;
   photo?: string;
+}
+
+export interface IPaginationGoogleContact {
+  size?: number;
+  search?: string;
+  nextPage?: string;
 }
 
 function findPrimary<T extends { metadata?: FieldMetadataType; default?: boolean }>(data: T[]): T {
