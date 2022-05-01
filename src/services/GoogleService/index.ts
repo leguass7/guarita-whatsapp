@@ -2,6 +2,7 @@ import type { Credentials } from 'google-auth-library';
 import { OAuth2Client } from 'google-auth-library/build/src/auth/oauth2client';
 import { people } from 'googleapis/build/src/apis/people';
 import { resolve } from 'path';
+import qrcode from 'qrcode-terminal';
 
 import { isDevMode } from '#/config';
 import { loadFileJSON, saveFileJSON } from '#/helpers/files';
@@ -49,6 +50,11 @@ export class GoogleService {
     this.loadCredentials().authorize();
   }
 
+  private saveTokens(tokens: TokenContent) {
+    const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
+    saveFileJSON(tokenFilePath, tokens);
+  }
+
   private loadCredentials() {
     const googlePath = this.options?.credentialsPath;
     const credentialFilePath = resolve(googlePath, 'credentials.json');
@@ -66,29 +72,31 @@ export class GoogleService {
     return this;
   }
 
+  public getAuthUrl() {
+    return this.authUrl;
+  }
+
   public async authorizeByCode(code: string): Promise<ResultAuthorisedByCode> {
     const { res, tokens } = await this.oAuth2Client.getToken(code);
     const result = { status: 500, tokens: null };
     if (tokens) {
-      const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
       this.tokens = tokens;
       this.oAuth2Client.setCredentials(tokens);
       this.authUrl = '';
-      saveFileJSON(tokenFilePath, tokens);
       result.tokens = tokens;
     }
     result.status = res?.status || 500;
     return result;
   }
 
-  public getAuthUrl() {
+  public requestAuthUrl() {
     const authUrl = this.oAuth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: SCOPES,
     });
     if (authUrl) {
       this.authUrl = authUrl;
-      // qrcode.generate(authUrl, { small: true });
+      qrcode.generate(authUrl, { small: true });
       logging('Para autorizar o google visite a URL:', authUrl);
     }
 
@@ -102,11 +110,17 @@ export class GoogleService {
       this.oAuth2Client = new OAuth2Client(client_id, client_secret, redirectUris);
       // new google.auth.OAuth2(client_id, client_secret, redirectUris);
       //
+      this.oAuth2Client.on('tokens', tokens => {
+        this.saveTokens(tokens);
+        logging('Tokens guardados.');
+      });
+
       if (this.tokens) {
         this.oAuth2Client.setCredentials(this.tokens);
+
         logging('Google autorizado');
       } else {
-        this.getAuthUrl();
+        this.requestAuthUrl();
       }
     }
   }
