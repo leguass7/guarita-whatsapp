@@ -127,7 +127,7 @@ export class GoogleService {
     const peopleApi = people({ version: 'v1', auth: this.oAuth2Client });
     const { status, data } = await peopleApi.people.connections.list({
       resourceName: 'people/me',
-      personFields: 'emailAddresses,names,phoneNumbers',
+      personFields: 'emailAddresses,names,phoneNumbers,coverPhotos',
       pageSize: 2000,
     });
 
