@@ -62,7 +62,6 @@ export class GoogleService {
     if (!credentials) {
       logError(`Credential file error ${credentialFilePath}`);
       return this;
-      // throw new Error(`Credential file error ${credentialFilePath}`);
     }
     this.credentials = credentials;
 
@@ -108,7 +107,6 @@ export class GoogleService {
       const { client_secret, client_id, redirect_uris } = this.credentials.installed;
       const redirectUris = isDevMode ? redirect_uris[0] : redirect_uris[1];
       this.oAuth2Client = new OAuth2Client(client_id, client_secret, redirectUris);
-      // new google.auth.OAuth2(client_id, client_secret, redirectUris);
       //
       this.oAuth2Client.on('tokens', tokens => {
         this.saveTokens(tokens);
