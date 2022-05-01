@@ -9,32 +9,38 @@ export interface IGoogleContact {
   phone?: string;
   email?: string;
   type?: string;
+  photo?: string;
 }
 
-function findPrimary<T extends { metadata?: FieldMetadataType }>(data: T[]): T {
-  const found = data.find(d => !!d?.metadata?.primary || !!d?.metadata?.verified);
+function findPrimary<T extends { metadata?: FieldMetadataType; default?: boolean }>(data: T[]): T {
+  const found = data.find(d => !!d?.metadata?.primary || !!d?.metadata?.verified || !!d?.default);
   if (found) return found;
   return data?.length ? data[0] : null;
 }
 
 export function personDto(connectionItem: PersonType): IGoogleContact {
-  const { resourceName, emailAddresses = [], names = [], phoneNumbers = [] } = connectionItem;
+  const { resourceName, emailAddresses = [], names = [], phoneNumbers = [], photos = [] } = connectionItem;
   const result: IGoogleContact = { resourceName };
+
+  if (phoneNumbers?.length) {
+    const phone = findPrimary(phoneNumbers);
+    result.phone = (phone?.canonicalForm || phone?.value || '').replace(/\D/g, '');
+    result.type = phone?.type?.toLowerCase();
+  }
 
   if (names?.length) {
     const name = findPrimary(names);
     result.name = name?.displayName || name?.givenName || 'no name';
   }
 
-  if (phoneNumbers?.length) {
-    const phone = findPrimary(phoneNumbers);
-    result.phone = phone?.canonicalForm || phone?.value;
-    result.type = phone?.type?.toLowerCase();
-  }
-
   if (emailAddresses?.length) {
     const email = findPrimary(emailAddresses);
     result.email = email?.value;
+  }
+
+  if (photos?.length) {
+    const photo = findPrimary(photos);
+    result.photo = photo?.url;
   }
 
   return result;

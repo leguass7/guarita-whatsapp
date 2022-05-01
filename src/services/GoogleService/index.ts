@@ -9,6 +9,7 @@ import { loadFileJSON, saveFileJSON } from '#/helpers/files';
 
 import { logError, logging } from '../logger';
 import { LogClass } from '../logger/log-decorator';
+import { personDto } from './person.dto';
 
 type TokenContent = Credentials;
 interface CredentialContent {
@@ -37,6 +38,9 @@ const SCOPES = [
   'https://www.googleapis.com/auth/contacts',
   //
 ];
+
+const credentialFileName = 'credentials.json';
+const tokenFileName = 'token.json';
 @LogClass
 export class GoogleService {
   private name: string;
@@ -51,13 +55,13 @@ export class GoogleService {
   }
 
   private saveTokens(tokens: TokenContent) {
-    const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
+    const tokenFilePath = resolve(this.options?.credentialsPath, tokenFileName);
     saveFileJSON(tokenFilePath, tokens);
   }
 
   private loadCredentials() {
     const googlePath = this.options?.credentialsPath;
-    const credentialFilePath = resolve(googlePath, 'credentials.json');
+    const credentialFilePath = resolve(googlePath, credentialFileName);
     const credentials = loadFileJSON(credentialFilePath);
     if (!credentials) {
       logError(`Credential file error ${credentialFilePath}`);
@@ -65,7 +69,7 @@ export class GoogleService {
     }
     this.credentials = credentials;
 
-    const tokenFilePath = resolve(googlePath, 'token.json');
+    const tokenFilePath = resolve(googlePath, tokenFileName);
     const tokens = loadFileJSON(tokenFilePath);
     this.tokens = tokens;
     return this;
@@ -127,14 +131,14 @@ export class GoogleService {
     const peopleApi = people({ version: 'v1', auth: this.oAuth2Client });
     const { status, data } = await peopleApi.people.connections.list({
       resourceName: 'people/me',
-      personFields: 'emailAddresses,names,phoneNumbers,coverPhotos',
-      pageSize: 2000,
+      personFields: 'emailAddresses,names,phoneNumbers,photos',
+      pageSize: 100,
     });
 
     // console.log('data?.nextPageToken', data?.nextPageToken);
     // console.log('data?.totalItems', data?.totalItems, data?.connections.length);
     // console.log('data?.totalPeople', data?.totalPeople);
 
-    return status === 200 ? data?.connections || [] : [];
+    return status === 200 ? data?.connections?.map(personDto)?.filter(f => !!f) || [] : [];
   }
 }
