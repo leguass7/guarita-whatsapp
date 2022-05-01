@@ -1,11 +1,13 @@
-FROM node:current-alpine3.14
+#FROM node:current-alpine3.14
+FROM node:lts-alpine3.14
 
 WORKDIR /usr/app
 
 COPY . .
 
+# RUN yarn install --frozen-lockfile --production
 RUN yarn install --frozen-lockfile
 
-RUN yarn build
+RUN yarn build:heap
 
 CMD ["yarn", "start"]

@@ -1,5 +1,6 @@
-import { OAuth2Client, Credentials } from 'google-auth-library';
-import { google } from 'googleapis';
+import type { Credentials } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library/build/src/auth/oauth2client';
+import { people } from 'googleapis/build/src/apis/people';
 import { resolve } from 'path';
 import qrcode from 'qrcode-terminal';
 
@@ -49,6 +50,11 @@ export class GoogleService {
     this.loadCredentials().authorize();
   }
 
+  private saveTokens(tokens: TokenContent) {
+    const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
+    saveFileJSON(tokenFilePath, tokens);
+  }
+
   private loadCredentials() {
     const googlePath = this.options?.credentialsPath;
     const credentialFilePath = resolve(googlePath, 'credentials.json');
@@ -56,7 +62,6 @@ export class GoogleService {
     if (!credentials) {
       logError(`Credential file error ${credentialFilePath}`);
       return this;
-      // throw new Error(`Credential file error ${credentialFilePath}`);
     }
     this.credentials = credentials;
 
@@ -66,22 +71,24 @@ export class GoogleService {
     return this;
   }
 
+  public getAuthUrl() {
+    return this.authUrl;
+  }
+
   public async authorizeByCode(code: string): Promise<ResultAuthorisedByCode> {
     const { res, tokens } = await this.oAuth2Client.getToken(code);
     const result = { status: 500, tokens: null };
     if (tokens) {
-      const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
       this.tokens = tokens;
       this.oAuth2Client.setCredentials(tokens);
       this.authUrl = '';
-      saveFileJSON(tokenFilePath, tokens);
       result.tokens = tokens;
     }
     result.status = res?.status || 500;
     return result;
   }
 
-  public getAuthUrl() {
+  public requestAuthUrl() {
     const authUrl = this.oAuth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: SCOPES,
@@ -99,19 +106,25 @@ export class GoogleService {
     if (this.credentials?.installed) {
       const { client_secret, client_id, redirect_uris } = this.credentials.installed;
       const redirectUris = isDevMode ? redirect_uris[0] : redirect_uris[1];
-      this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUris);
+      this.oAuth2Client = new OAuth2Client(client_id, client_secret, redirectUris);
       //
+      this.oAuth2Client.on('tokens', tokens => {
+        this.saveTokens(tokens);
+        logging('Tokens guardados.');
+      });
+
       if (this.tokens) {
         this.oAuth2Client.setCredentials(this.tokens);
+
         logging('Google autorizado');
       } else {
-        this.getAuthUrl();
+        this.requestAuthUrl();
       }
     }
   }
 
   async getContacts() {
-    const peopleApi = google.people({ version: 'v1', auth: this.oAuth2Client });
+    const peopleApi = people({ version: 'v1', auth: this.oAuth2Client });
     const { status, data } = await peopleApi.people.connections.list({
       resourceName: 'people/me',
       personFields: 'emailAddresses,names,phoneNumbers',
