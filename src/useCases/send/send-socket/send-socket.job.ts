@@ -23,14 +23,13 @@ const defaultJobOptions: JobOptions = {
   delay: 100,
   attempts: 2,
   timeout: 30000,
-  //   backoff: { type: 'exponential', delay: 60 * 8 * 1000 }, // 8 minutos
-  backoff: { type: 'exponential', delay: 1000 },
+  backoff: { type: 'exponential', delay: 1000 * 30 }, // tenta novamente depois de 30s
 };
 
 export const sendSocketQueueOptions: QueueOptions = {
   defaultJobOptions,
   prefix,
-  limiter: { max: 1, duration: 1000 * 60 },
+  limiter: { max: 1, duration: 1000 * 36 },
 };
 
 export function createSendSocketJob(socketService: SocketService): IJob<JobNames, SendSocketPayload> {

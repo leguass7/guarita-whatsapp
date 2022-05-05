@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
+import { logging } from '#/services/logger';
 
 import { RequestSendSocketTextDto } from './send-socket.dto';
 import type { SendSocketService } from './send-socket.service';
@@ -10,7 +11,8 @@ export class SendSocketController {
   constructor(private sendSocketService: SendSocketService) {}
 
   async sendMessage(req: Request, res: Response, _next: NextFunction) {
-    const { to, text } = req.body as RequestSendSocketTextDto;
+    const { to, text, metaData } = req.body as RequestSendSocketTextDto;
+    logging('sendMessage metaData', metaData?.userName, metaData?.email);
     const response = await this.sendSocketService.sendScheduledText({ to, text });
     return res
       .status(200)
