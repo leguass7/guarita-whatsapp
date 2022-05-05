@@ -3,7 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 // FIXME: Falta campo
 @Entity('contacts')
 export class Contact {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()

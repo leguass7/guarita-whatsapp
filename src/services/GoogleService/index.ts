@@ -9,25 +9,17 @@ import { loadFileJSON, saveFileJSON } from '#/helpers/files';
 
 import { logError, logging } from '../logger';
 import { LogClass } from '../logger/log-decorator';
+import { CredentialContent, IGoogleContact, IPaginationGoogleContact, ListParamsType, personDto } from './google-service.dto';
 
-type TokenContent = Credentials;
-interface CredentialContent {
-  installed: {
-    client_id: string;
-    project_id: string;
-    auth_uri: string;
-    token_uri: string;
-    auth_provider_x509_cert_url: string;
-    client_secret: string;
-    redirect_uris: string[];
-  };
-}
+export type { IGoogleContact, CredentialContent, IPaginationGoogleContact };
 
-interface GoogleServiceOptions {
+export type TokenContent = Credentials;
+
+export interface GoogleServiceOptions {
   credentialsPath: string;
 }
 
-interface ResultAuthorisedByCode {
+export interface ResultAuthorisedByCode {
   status: number;
   tokens?: TokenContent;
 }
@@ -37,6 +29,9 @@ const SCOPES = [
   'https://www.googleapis.com/auth/contacts',
   //
 ];
+
+const credentialFileName = 'credentials.json';
+const tokenFileName = 'token.json';
 @LogClass
 export class GoogleService {
   private name: string;
@@ -51,13 +46,13 @@ export class GoogleService {
   }
 
   private saveTokens(tokens: TokenContent) {
-    const tokenFilePath = resolve(this.options?.credentialsPath, 'token.json');
+    const tokenFilePath = resolve(this.options?.credentialsPath, tokenFileName);
     saveFileJSON(tokenFilePath, tokens);
   }
 
   private loadCredentials() {
     const googlePath = this.options?.credentialsPath;
-    const credentialFilePath = resolve(googlePath, 'credentials.json');
+    const credentialFilePath = resolve(googlePath, credentialFileName);
     const credentials = loadFileJSON(credentialFilePath);
     if (!credentials) {
       logError(`Credential file error ${credentialFilePath}`);
@@ -65,7 +60,7 @@ export class GoogleService {
     }
     this.credentials = credentials;
 
-    const tokenFilePath = resolve(googlePath, 'token.json');
+    const tokenFilePath = resolve(googlePath, tokenFileName);
     const tokens = loadFileJSON(tokenFilePath);
     this.tokens = tokens;
     return this;
@@ -123,18 +118,39 @@ export class GoogleService {
     }
   }
 
-  async getContacts() {
+  async getContacts({ size = 0, nextPage }: IPaginationGoogleContact = {}) {
     const peopleApi = people({ version: 'v1', auth: this.oAuth2Client });
-    const { status, data } = await peopleApi.people.connections.list({
-      resourceName: 'people/me',
-      personFields: 'emailAddresses,names,phoneNumbers',
-      pageSize: 2000,
-    });
+    const params: ListParamsType = { resourceName: 'people/me', personFields: 'emailAddresses,names,phoneNumbers,photos', pageSize: size };
 
-    // console.log('data?.nextPageToken', data?.nextPageToken);
-    // console.log('data?.totalItems', data?.totalItems, data?.connections.length);
-    // console.log('data?.totalPeople', data?.totalPeople);
+    if (nextPage) params.pageToken = nextPage;
+    const { status, data } = await peopleApi.people.connections.list(params);
 
-    return status === 200 ? data?.connections || [] : [];
+    const success = !!(status === 200);
+    return {
+      success,
+      data: success ? data?.connections?.map(personDto)?.filter(f => !!f) || [] : [],
+      nextPageToken: data.nextPageToken,
+      totalItems: data?.totalItems,
+      size: data?.connections?.length,
+    };
+  }
+
+  async allContacts(pageSize = 500): Promise<IGoogleContact[]> {
+    const resultData: IGoogleContact[] = [];
+
+    const next = async (resolver: (value: IGoogleContact[] | PromiseLike<IGoogleContact[]>) => void, nextPage?: string) => {
+      const params: IPaginationGoogleContact = { size: pageSize };
+      if (nextPage) params.nextPage = nextPage;
+
+      const { success, nextPageToken, data } = await this.getContacts(params);
+      if (success) data.forEach(d => resultData.push(d));
+
+      if (success && nextPageToken) {
+        return next(resolver, nextPageToken);
+      }
+      return resolver(resultData);
+    };
+
+    return new Promise(resolve => next(resolve));
   }
 }
