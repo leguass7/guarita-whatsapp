@@ -6,8 +6,8 @@ Serviço para entrega de mensagem no whatsapp via [MAXBOT](https://mbr.maxbot.co
 
 ## Motivação
 
-Estamos tendo problemas nas entragas de mensagens pelo servidor da AVATAR, está muito dificil depurar o motivo.
-Precisamos de um server responsável apenas por essas entregas.
+Estamos tendo problemas nas entregas de mensagens pelo servidor da AVATAR, está muito dificil depurar o motivo.
+Precisamos de um servidor responsável apenas por essas entregas.
 
 ---
 
