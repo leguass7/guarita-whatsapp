@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { googleService } from '#/services/google.service';
+import { googleService } from '#/useCases/google.service';
 
 import { ContactGoogleController } from './contact-google.controller';
 import { ContactGoogleService } from './contact-google.service';

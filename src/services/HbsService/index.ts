@@ -2,8 +2,8 @@ import { create, ExpressHandlebars } from 'express-handlebars';
 import { join, resolve } from 'path';
 
 import { fileExists } from '#/helpers/files';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 
-import { LogClass } from '../logger/log-decorator';
 import { templateLayoutOptions } from './constants';
 
 @LogClass

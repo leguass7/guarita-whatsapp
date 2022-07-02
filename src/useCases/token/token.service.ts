@@ -3,7 +3,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { HttpException } from '#/app/exceptions/HttpException';
 import { isDefined } from '#/helpers/validation';
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 
 import { CreateTokenDto, FilterTokenDto } from './token.dto';
 import { Token } from './token.entity';

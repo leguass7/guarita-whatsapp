@@ -1,8 +1,8 @@
 import { baseEmailAssets } from '#/config';
-import { logging } from '#/services/logger';
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 import type { EmailSentService } from '#/useCases/email';
 import { setImageNameDto } from '#/useCases/email/email-assets.util';
+import { loggerService } from '#/useCases/logger.service';
 
 import type { SendEmailDto } from './send-email.dto';
 import type { ContingencyContext, SendEmailHbs, TemplateTrackers } from './send-email.hbs';
@@ -61,7 +61,7 @@ export class SendEmailService {
       .setWorker('SendHtmlEmailJob')
       .trying(() => null, true)
       .failed(() => null, true)
-      .success(() => logging(`CONTINGENCY EMAIL: ${jobId} ${email}`), true)
+      .success(() => loggerService.logging(`CONTINGENCY EMAIL: ${jobId} ${email}`), true)
       .save<SendContingencyEmailPayload>({ email, subject, html });
     return { job };
   }

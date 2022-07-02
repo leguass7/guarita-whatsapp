@@ -2,9 +2,9 @@ import Bull, { QueueOptions, Queue, JobOptions, ProcessCallbackFunction, Job } f
 import { v4 as uuidV4 } from 'uuid';
 
 import { redisConfig } from '#/config/redis';
+import { loggerService } from '#/useCases/logger.service';
 
-import { LoggerJobs } from '../logger';
-import { LogClass } from '../logger/log-decorator';
+import { LogClass } from '../LoggerService/log-class.decorator';
 import { QueueWorker, ProcessType, FailedPromiseCallback } from './QueueWorker';
 
 export type { JobOptions, FailedPromiseCallback, QueueOptions };
@@ -67,7 +67,7 @@ export class QueueService<K extends string = any, T = any> {
   }
 
   public log(message: string, type: 'error' | 'info' = 'error') {
-    LoggerJobs[type](`QueueService ${this.queueName} ${message}`);
+    loggerService.loggerJobs[type](`QueueService ${this.queueName} ${message}`);
   }
 
   async add(jobName: K, data: T, jobOptions: JobOptions = {}): Promise<Job<T>> {

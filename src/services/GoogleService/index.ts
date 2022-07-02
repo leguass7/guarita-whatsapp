@@ -6,9 +6,9 @@ import qrcode from 'qrcode-terminal';
 
 import { isDevMode } from '#/config';
 import { loadFileJSON, saveFileJSON } from '#/helpers/files';
+import { loggerService } from '#/useCases/logger.service';
 
-import { logError, logging } from '../logger';
-import { LogClass } from '../logger/log-decorator';
+import { LogClass } from '../LoggerService/log-class.decorator';
 import { CredentialContent, IGoogleContact, IPaginationGoogleContact, ListParamsType, personDto } from './google-service.dto';
 
 export type { IGoogleContact, CredentialContent, IPaginationGoogleContact };
@@ -55,7 +55,7 @@ export class GoogleService {
     const credentialFilePath = resolve(googlePath, credentialFileName);
     const credentials = loadFileJSON(credentialFilePath);
     if (!credentials) {
-      logError(`Credential file error ${credentialFilePath}`);
+      loggerService.logError(`Credential file error ${credentialFilePath}`);
       return this;
     }
     this.credentials = credentials;
@@ -91,7 +91,7 @@ export class GoogleService {
     if (authUrl) {
       this.authUrl = authUrl;
       qrcode.generate(authUrl, { small: true });
-      logging('Para autorizar o google visite a URL:', authUrl);
+      loggerService.logging('Para autorizar o google visite a URL:', authUrl);
     }
 
     return authUrl;
@@ -105,13 +105,13 @@ export class GoogleService {
       //
       this.oAuth2Client.on('tokens', tokens => {
         this.saveTokens(tokens);
-        logging('Tokens guardados.');
+        loggerService.logging('Tokens guardados.');
       });
 
       if (this.tokens) {
         this.oAuth2Client.setCredentials(this.tokens);
 
-        logging('Google autorizado');
+        loggerService.logging('Google autorizado');
       } else {
         this.requestAuthUrl();
       }

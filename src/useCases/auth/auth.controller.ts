@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
-import type { GoogleService } from '#/services/google.service';
+import type { GoogleService } from '#/useCases/google.service';
 
 import { IRequestAuthorize, IResponseAuthorize } from './auth.dto';
 import { AuthService } from './auth.service';

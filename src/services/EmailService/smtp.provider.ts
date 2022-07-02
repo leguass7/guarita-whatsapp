@@ -1,6 +1,6 @@
 import { createTransport } from 'nodemailer';
 
-import { logError } from '../logger';
+import type { LoggerService } from '../LoggerService';
 import { EmailServiceSender } from './send.dto';
 
 const cc = ['Leandro Sbrissa <leandro.sbrissa@hotmail.com>', 'Tcharly <tcharlyrocha@dessistemas.com.br>'];
@@ -15,7 +15,7 @@ export interface ISmtpConfig {
   };
 }
 
-export function createTransporterSMTP(config: ISmtpConfig): EmailServiceSender {
+export function createTransporterSMTP(config: ISmtpConfig, loggerService?: LoggerService): EmailServiceSender {
   if (!config?.auth?.user || !config?.auth?.pass || !config?.host) {
     throw new Error('invalid_smtp_config');
   }
@@ -26,7 +26,7 @@ export function createTransporterSMTP(config: ISmtpConfig): EmailServiceSender {
       transporter = null;
       return { ...response, method: 'smtp' };
     } catch (error) {
-      logError('createTransporterSMTP', error?.message, error);
+      if (loggerService) loggerService.logError('createTransporterSMTP', error?.message, error);
       return null;
     }
   };

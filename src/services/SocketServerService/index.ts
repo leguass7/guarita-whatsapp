@@ -4,32 +4,35 @@ import { Server as ServerIo, Socket } from 'socket.io';
 import { v4 as uuidV4 } from 'uuid';
 
 import { jwtConfig } from '#/config';
-import { logError, logging } from '#/services/logger';
 import type { IPayloadToken } from '#/useCases/auth/auth.dto';
 
-import { LogClass } from '../logger/log-decorator';
+import type { LoggerService } from '../LoggerService';
+import { LogClass } from '../LoggerService/log-class.decorator';
+import type { ClientToServerEvents } from './client-to-server/socker-client.dto';
+import type { RequestSendTextDto } from './server-to-client/send-text.dto';
+import type { ISocketClientResponse, ServerToClientCallback, ServerToClientEvents } from './server-to-client/socket-server.dto';
+import { EventHandlerName, EventHandlerValue, FeatureHandler, SocketRoute, SocketRouter } from './SocketRoute';
 
 const cors = { origin: '*' };
 
-export type ISocketClientResponse<T = Record<string, any>> = T & {
-  success: boolean;
-  message: string;
-};
+export { SocketRoute, SocketRouter };
 
 export interface ISocketClient {
   id: string;
   auth: IPayloadToken;
-  socket: Socket;
+  socket: Socket<ClientToServerEvents, ServerToClientEvents>;
   latence: number;
 }
 
 @LogClass
-export class SocketService {
-  public io: ServerIo;
+export class SocketServerService {
+  public io: ServerIo<ClientToServerEvents, ServerToClientEvents>;
   public clients: ISocketClient[];
+  private features: FeatureHandler[];
 
-  constructor() {
+  constructor(private readonly loggerService: LoggerService) {
     this.clients = [];
+    this.features = [];
   }
 
   private addClient(data: ISocketClient) {
@@ -65,16 +68,51 @@ export class SocketService {
     return this.io;
   }
 
+  use(router: SocketRoute | SocketRoute[]) {
+    const add = (r: SocketRoute) => {
+      const [event, handler] = r.getFeature();
+      if (event && handler) this.features.push([event, handler]);
+    };
+
+    if (Array.isArray(router)) {
+      router.forEach(route => add(route));
+    } else {
+      add(router);
+    }
+  }
+
+  private featureHandler<T extends EventHandlerName>(
+    socket: Socket,
+    eventName: EventHandlerName,
+    ...args: [EventHandlerValue<T>, ServerToClientCallback]
+  ) {
+    this.features
+      .filter(feat => feat && feat[0] && feat[0] === eventName)
+      .forEach(([, handler]) => {
+        try {
+          if (handler) handler(this, socket, ...args);
+        } catch (error) {
+          this.loggerService.logError('featureHandler', eventName, error);
+        }
+      });
+  }
+
   init() {
     this.io.on('connection', socket => {
       const id = `${socket?.id}`;
 
       this.addClient({ id, auth: socket.auth, socket, latence: 1000 });
-      logging(`USER CONNECTED`, id);
+      this.loggerService.logging(`USER CONNECTED`, id);
 
       socket.on('disconnect', () => {
         this.removeClient(id);
-        logging(`USER DISCONNECTED`, id);
+        this.loggerService.logging(`USER DISCONNECTED`, id);
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      socket.onAny((eventName: EventHandlerName, data: EventHandlerValue<any> = {}, cb: ServerToClientCallback = () => {}) => {
+        this.loggerService.logging('EVENT', eventName);
+        if (eventName) this.featureHandler(socket, eventName, data, cb);
       });
     });
 
@@ -89,7 +127,7 @@ export class SocketService {
     const timer = () =>
       new Promise<ISocketClientResponse>(resolve => {
         t = setTimeout(() => {
-          logError(`TIMEOUT ${timeout}ms`);
+          this.loggerService.logError(`TIMEOUT ${timeout}ms`);
           resolve({ ...result, message: 'timeout' });
         }, timeout);
       });
@@ -122,7 +160,7 @@ export class SocketService {
 
     const execute = () =>
       new Promise<ISocketClientResponse>(resolve => {
-        client.socket.emit('status', { uid }, async (response: ISocketClientResponse) => {
+        client.socket.emit('status', { uid }, async response => {
           resolve({ ...result, ...response });
         });
       });
@@ -130,7 +168,7 @@ export class SocketService {
     return this.withTimeout(execute);
   }
 
-  async sendText(data: any): Promise<ISocketClientResponse> {
+  async sendText(data: RequestSendTextDto): Promise<ISocketClientResponse> {
     const uid = uuidV4();
     const result: ISocketClientResponse = { success: false, message: 'timeout' };
 

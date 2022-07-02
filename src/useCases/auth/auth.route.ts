@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { googleService } from '#/services/google.service';
+import { googleService } from '#/useCases/google.service';
 
 import { tokenService } from '../token/token.route';
 import { AuthController } from './auth.controller';

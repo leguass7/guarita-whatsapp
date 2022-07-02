@@ -7,8 +7,8 @@ import { Server, createServer } from 'http';
 import morgan from 'morgan';
 import requestIp from 'request-ip';
 
-import { logError, logging } from '#/services/logger';
-import type { SocketService } from '#/services/SocketService';
+import type { LoggerService } from '#/services/LoggerService';
+import type { SocketServerService } from '#/services/SocketServerService';
 import { queues } from '#/useCases/index.job';
 import { IndexRoute } from '#/useCases/index.route';
 
@@ -28,19 +28,19 @@ export class AppExpress {
   private readonly server: Server;
   private started: boolean;
 
-  constructor({ port, env }: IAppOptions, private socketService?: SocketService) {
+  constructor({ port, env }: IAppOptions, private readonly socketServerService: SocketServerService, private readonly loggerService?: LoggerService) {
     this.port = port;
     this.env = env;
     this.express = express();
     this.server = createServer(this.express);
     this.started = false;
-    if (this.socketService) this.socketService.createFromExpress(this.server);
+    if (this.socketServerService) this.socketServerService.createFromExpress(this.server);
     return this;
   }
 
   private socketServer() {
-    if (this.socketService) {
-      this.socketService.init();
+    if (this.socketServerService) {
+      this.socketServerService.init();
     }
   }
 
@@ -82,10 +82,14 @@ export class AppExpress {
     try {
       if (!this.started) await this.start();
       return this.server.listen(this.port, () => {
-        logging(`STARTED SERVER development=${this.env}`, `PORT=${this.port}`);
+        if (this.loggerService) {
+          this.loggerService.logging(`STARTED SERVER development=${this.env}`, `PORT=${this.port}`);
+        }
       });
     } catch {
-      logError(`Server ERROR`);
+      if (this.loggerService) {
+        this.loggerService.logError(`Server ERROR`);
+      }
     }
   }
 

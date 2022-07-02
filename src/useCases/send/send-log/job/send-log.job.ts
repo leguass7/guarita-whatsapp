@@ -2,8 +2,8 @@ import { format } from 'date-fns';
 
 import { env, isDevMode } from '#/config';
 import { MailService } from '#/services/EmailService';
-import { logError, logging } from '#/services/logger';
 import type { IJob, QueueService, JobOptions } from '#/services/QueueService';
+import { loggerService } from '#/useCases/logger.service';
 
 import { SendLogService } from '../send-log.service';
 import { buildMailBody, MailFailedBody } from './send-log.html';
@@ -37,7 +37,7 @@ export function createSendLogJob(sendLogService: SendLogService): IJob<SendLogJo
 
       const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
-      const mailService = new MailService('smtp');
+      const mailService = new MailService('smtp', loggerService);
       const sent = await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
         to,
@@ -57,7 +57,7 @@ export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
 
     const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `, Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
-    const mailService = new MailService('smtp');
+    const mailService = new MailService('smtp', loggerService);
     const sent = await mailService.send({
       from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
       to,
@@ -73,14 +73,14 @@ export async function repeatRegister(queue: QueueService<SendLogJobNames, SendLo
   const job = await queue
     .setWorker('SendFailures')
     .trying(({ data, failedReason }) => {
-      logError(`SendFailures TRYING`, failedReason, data.startedIn);
+      loggerService.logError(`SendFailures TRYING`, failedReason, data.startedIn);
     })
     .failed(({ data, failedReason }) => {
-      logError(`SendFailures ERROR`, failedReason, data.startedIn);
+      loggerService.logError(`SendFailures ERROR`, failedReason, data.startedIn);
     })
     .success(({ data }) => {
-      logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
+      loggerService.logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
     })
     .save({ startedIn: new Date() }, { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true });
-  logging('repeatRegister', job.name, job.id);
+  loggerService.logging('repeatRegister', job.name, job.id);
 }

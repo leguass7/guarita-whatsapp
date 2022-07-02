@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
-import type { GoogleService } from '#/services/google.service';
+import type { GoogleService } from '#/useCases/google.service';
 
 import type { ContactGoogleService } from './contact-google.service';
 

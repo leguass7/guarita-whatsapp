@@ -1,6 +1,6 @@
 import { CompletedEventCallback, FailedEventCallback, Job, JobOptions, Queue } from 'bull';
 
-import { logging } from '../logger';
+import { loggerService } from '#/useCases/logger.service';
 
 export type FailedPromiseCallback<T, R = any> = (job: Job<T>, result: any) => Promise<R>;
 export interface QueueWorkerCallback<T = any> {
@@ -38,7 +38,7 @@ export class QueueWorker<T = any, K extends string = any> {
 
   public async save<G = T>(data?: G, jobOptions: JobOptions = {}) {
     const job = await this.queue.add(this.jobName, data, { ...jobOptions });
-    logging('QueueWorker job adicionado', job.name);
+    loggerService.logging('QueueWorker job adicionado', job.name);
     this.jobId = job?.id;
     return job;
   }

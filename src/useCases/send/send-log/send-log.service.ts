@@ -4,12 +4,14 @@ import { FindConditions, FindManyOptions, getRepository, In, Like } from 'typeor
 import { isDevMode } from '#/config';
 import { makeArray } from '#/helpers/array';
 import { isDefined } from '#/helpers/validation';
-import { logError, logging } from '#/services/logger';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
+import { loggerService } from '#/useCases/logger.service';
 
 import type { SendLogPayloadBody, SendLogsQueue } from './job/send-log.job';
 import type { CreateSendLog, FilterSendLogDto } from './send-log.dto';
 import { SendLog } from './send-log.entity';
 
+@LogClass
 export class SendLogService {
   constructor(private sendLogsBodyQueue: SendLogsQueue) {}
   async create(data: CreateSendLog) {
@@ -63,9 +65,9 @@ export class SendLogService {
 
     const job = await this.sendLogsBodyQueue
       .setWorker('SendLogBody')
-      .trying(({ failedReason, attemptsMade }) => logError('SendLogService TENTANDO:', attemptsMade, failedReason), true)
-      .failed(({ failedReason }) => logError('SendLogService FALHOU:', failedReason), true)
-      .success(() => logging('SendLogService ENVIADO SendLogBody:', subject), true)
+      .trying(({ failedReason, attemptsMade }) => loggerService.logError('SendLogService TENTANDO:', attemptsMade, failedReason), true)
+      .failed(({ failedReason }) => loggerService.logError('SendLogService FALHOU:', failedReason), true)
+      .success(() => loggerService.logging('SendLogService ENVIADO SendLogBody:', subject), true)
       .save(payload, { removeOnComplete: true, removeOnFail: true });
     return job;
   }

@@ -1,6 +1,7 @@
 import { isDevMode } from '#/config';
 import { EmailServiceResponseDto, MailService } from '#/services/EmailService';
 import { IJob, QueueService, JobOptions } from '#/services/QueueService';
+import { loggerService } from '#/useCases/logger.service';
 
 export type SendContingencyEmailPayload = {
   email: string;
@@ -23,7 +24,7 @@ export const sendHtmlEmailJob: IJob<JobNames, SendContingencyEmailPayload> = {
   async handle({ data }) {
     const { email: to, html, subject } = data;
 
-    const mailService = new MailService('smtp');
+    const mailService = new MailService('smtp', loggerService);
     const response = await mailService.send({ to, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}`, html });
     return response?.messageId;
   },
@@ -34,7 +35,7 @@ export const sendGeneralEmailJob: IJob<JobNames, SendGeneralEmailPayload> = {
   async handle({ data }) {
     const { email: to, text, subject } = data;
 
-    const mailService = new MailService('smtp');
+    const mailService = new MailService('smtp', loggerService);
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
     const response = await mailService.send({ to, html: text, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}` });

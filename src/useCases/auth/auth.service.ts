@@ -2,7 +2,7 @@ import { sign, SignOptions } from 'jsonwebtoken';
 
 import { HttpException } from '#/app/exceptions/HttpException';
 import { jwtConfig } from '#/config';
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 
 import { TokenService } from '../token/token.service';
 import { IPayloadToken } from './auth.dto';

@@ -1,5 +1,6 @@
 import { isDevMode } from '#/config';
-import { logDev } from '#/services/logger';
+
+import { logDev } from '.';
 
 export function LogClass(target: any) {
   // save a reference to the original constructor

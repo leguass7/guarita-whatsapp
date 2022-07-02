@@ -2,9 +2,9 @@ import type { Job } from 'bull';
 
 import { HttpException } from '#/app/exceptions/HttpException';
 import type { CacheService } from '#/services/ChacheService';
-import { logError, logging } from '#/services/logger';
-import { LogClass } from '#/services/logger/log-decorator';
-import type { SocketService } from '#/services/SocketService';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
+import type { SocketServerService } from '#/services/SocketServerService';
+import { loggerService } from '#/useCases/logger.service';
 
 import type { CreateSendLog } from '../send-log/send-log.dto';
 import type { EnventType } from '../send-log/send-log.entity';
@@ -15,7 +15,7 @@ import type { SendSocketQueueService } from './send-socket.job';
 @LogClass
 export class SendSocketService {
   constructor(
-    private socketService: SocketService,
+    private socketServerService: SocketServerService,
     private sendSocketQueue: SendSocketQueueService,
     private cacheService: CacheService,
     private sendLogService: SendLogService,
@@ -33,7 +33,7 @@ export class SendSocketService {
       const has = await this.sendLogService.findOne({ jobId, attemptsMade, eventType });
       if (has) return null;
       const createdId = await saveData({ ...data, eventType, response, createdAt: new Date(), jobId, message });
-      logError(`SendSocketService processFailed type=${eventType} to=${data.to} ${message} created:${createdId}`);
+      loggerService.logError(`SendSocketService processFailed type=${eventType} to=${data.to} ${message} created:${createdId}`);
       return createdId;
     };
 
@@ -74,17 +74,17 @@ export class SendSocketService {
   }
 
   async sendText(data: RequestSendSocketTextDto) {
-    const response = await this.socketService.sendText(data);
+    const response = await this.socketServerService.sendText(data);
     if (!response?.success) {
       throw new HttpException(503, `service_unavailable`);
     }
-    logging('SendSocketService sendText:', data?.to, response?.messageId);
+    loggerService.logging('SendSocketService sendText:', data?.to, response?.messageId);
     return response;
   }
 
   async getStatus() {
-    const response = await this.socketService.getStatus();
-    logging('SendSocketService getStatus:', response?.message);
+    const response = await this.socketServerService.getStatus();
+    loggerService.logging('SendSocketService getStatus:', response?.message);
     return response;
   }
 }

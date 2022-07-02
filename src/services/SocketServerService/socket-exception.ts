@@ -1,4 +1,4 @@
-import type { ISocketClientResponse } from '.';
+import { ISocketClientResponse } from './server-to-client/socket-server.dto';
 
 export class SocketException extends TypeError {
   message: string;

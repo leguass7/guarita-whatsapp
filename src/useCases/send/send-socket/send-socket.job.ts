@@ -1,10 +1,10 @@
 import type { Job, JobOptions } from 'bull';
 
 import { prefix } from '#/config';
-import { logging } from '#/services/logger';
 import type { IJob, QueueService, QueueOptions } from '#/services/QueueService';
-import type { SocketService } from '#/services/SocketService';
-import { SocketException } from '#/services/SocketService/socket-exception';
+import type { SocketServerService } from '#/services/SocketServerService';
+import { SocketException } from '#/services/SocketServerService/socket-exception';
+import { loggerService } from '#/useCases/logger.service';
 
 export type SendSocketPayload = {
   to: string;
@@ -32,16 +32,16 @@ export const sendSocketQueueOptions: QueueOptions = {
   limiter: { max: 1, duration: 1000 * 36 },
 };
 
-export function createSendSocketJob(socketService: SocketService): IJob<JobNames, SendSocketPayload> {
+export function createSendSocketJob(socketServerService: SocketServerService): IJob<JobNames, SendSocketPayload> {
   return {
     name: 'SendSocketText',
     handle: async ({ data }) => {
       const { text, to } = data;
-      const message = await socketService.sendText({ text, to });
+      const message = await socketServerService.sendText({ text, to });
       if (!message || !message?.success) {
         throw new SocketException(`SendSocketText error ${to}`, { ...message });
       }
-      logging('SendSocketJob SUCCESS', to);
+      loggerService.logging('SendSocketJob SUCCESS', to);
       return message;
     },
   };

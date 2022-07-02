@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { JsonWebTokenError, NotBeforeError, TokenExpiredError } from 'jsonwebtoken';
 
 import { HttpException } from '#/app/exceptions/HttpException';
-import { logError } from '#/services/logger';
+import { loggerService } from '#/useCases/logger.service';
 
 import { ApiResponseErrorDto } from './response.dto';
 
@@ -44,7 +44,7 @@ export function errorMiddleware(error: MiddleErrors, _req: Request, res: Respons
     result.message = error.message || 'Token inválido';
   }
 
-  logError(result?.status || 'no status', result?.message || 'no message');
+  loggerService.logError(result?.status || 'no status', result?.message || 'no message');
   // console.error('\n', error?.stack, error);
   // console.log('Erro não identificado');
 

@@ -1,9 +1,9 @@
 import type { Job, JobOptions } from 'bull';
 
-import { logError } from '#/services/logger';
 import { MaxbotService, ISendTextResult } from '#/services/MaxbotService/index.ts';
 import { MaxbotException } from '#/services/MaxbotService/maxbot-exception';
 import { QueueService, IJob } from '#/services/QueueService';
+import { loggerService } from '#/useCases/logger.service';
 
 export type SendMaxbotPayload = {
   token: string;
@@ -42,7 +42,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     if (attemptsMade > 1) {
       const isReady = await maxbot.getStatus();
       if (!isReady) {
-        logError(`SendMaxbotText is not ready ${to}`);
+        loggerService.logError(`SendMaxbotText is not ready ${to}`);
         throw new MaxbotException(`SendMaxbotText is not ready ${to}`, {
           getStatus: true,
           status: 0,
@@ -54,7 +54,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     const response = await maxbot.sendText({ whatsapp: to }, text);
 
     if (!Boolean(response?.status)) {
-      logError(`SendMaxbotText status ${JSON.stringify(response)}`);
+      loggerService.logError(`SendMaxbotText status ${JSON.stringify(response)}`);
       throw new MaxbotException(response.msg, response);
     }
 

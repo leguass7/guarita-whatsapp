@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
 import type { CacheService } from '#/services/ChacheService/cache.service';
-import { logError, logging } from '#/services/logger';
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 import type { FailedPromiseCallback } from '#/services/QueueService';
+import { loggerService } from '#/useCases/logger.service';
 
 import type { SendEmailService } from './send-email/send-email.service';
 import type { CreateSendLog } from './send-log/send-log.dto';
@@ -63,7 +63,7 @@ export class SendService {
         jobId,
       });
       if (log && typeof log === 'function') log(created.id);
-      logError(`SendService processFailed type=${eventType} to=${data.to} ${message} created:${created?.id}`);
+      loggerService.logError(`SendService processFailed type=${eventType} to=${data.to} ${message} created:${created?.id}`);
       return created?.id;
     };
   }
@@ -98,7 +98,7 @@ export class SendService {
       eventType: 'success',
     };
 
-    const log: LogCallback = logId => logging('Mensagem enviada', to, logId);
+    const log: LogCallback = logId => loggerService.logging('Mensagem enviada', to, logId);
 
     const key = this.getCacheKey(to, text);
     const priority = this.getPriority(key);
@@ -132,7 +132,7 @@ export class SendService {
       scheduled: new Date(),
     };
 
-    const log: LogCallback = logId => logging('Imagem enviada', to, url, logId);
+    const log: LogCallback = logId => loggerService.logging('Imagem enviada', to, url, logId);
 
     const key = this.getCacheKey(to, url);
     const priority = this.getPriority(key);

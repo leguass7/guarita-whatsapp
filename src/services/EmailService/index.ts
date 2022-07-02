@@ -1,6 +1,7 @@
 import { smtpConfig, sendgridConfig, env } from '#/config';
+import type { LoggerService } from '#/services/LoggerService';
 
-import { LogClass } from '../logger/log-decorator';
+import { LogClass } from '../LoggerService/log-class.decorator';
 import { EmailException } from './email.exception';
 import { EmailServiceSender, SendPayloadDto, EmailServiceResponseDto, MailServiceProvider } from './send.dto';
 import { createTransporterSG } from './sendgrid.provider';
@@ -20,8 +21,8 @@ export { EmailException } from './email.exception';
 export class MailService {
   public sender: EmailServiceSender;
 
-  constructor(private provider: MailServiceProvider = 'smtp') {
-    this.sender = this.provider === 'smtp' ? createTransporterSMTP(smtpConfig) : createTransporterSG(sendgridConfig);
+  constructor(private provider: MailServiceProvider = 'smtp', private readonly loggerService: LoggerService) {
+    this.sender = this.provider === 'smtp' ? createTransporterSMTP(smtpConfig, this.loggerService) : createTransporterSG(sendgridConfig);
     return this;
   }
 

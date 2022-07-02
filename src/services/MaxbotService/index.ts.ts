@@ -1,7 +1,7 @@
 import Maxbot, { MaxbotOptions } from 'maxbotjs';
-export * from 'maxbotjs';
 
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '../LoggerService/log-class.decorator';
+export * from 'maxbotjs';
 
 export { MaxbotException } from './maxbot-exception';
 

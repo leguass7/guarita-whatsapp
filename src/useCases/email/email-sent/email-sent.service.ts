@@ -1,6 +1,6 @@
 import { DeepPartial, getRepository } from 'typeorm';
 
-import { LogClass } from '#/services/logger/log-decorator';
+import { LogClass } from '#/services/LoggerService/log-class.decorator';
 
 import { EmailSent } from './email-sent.entity';
 

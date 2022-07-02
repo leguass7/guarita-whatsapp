@@ -1,4 +1,4 @@
-import type { GoogleService } from '#/services/google.service';
+import type { GoogleService } from '#/services/GoogleService';
 
 import type { PaginatedGoogleContactDto } from './contact-google.dto';
 

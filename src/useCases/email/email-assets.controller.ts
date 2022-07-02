@@ -4,8 +4,8 @@ import { resolve } from 'path';
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
 import { pathVolume } from '#/config';
 import { fileExists } from '#/helpers/files';
-import { logWarn } from '#/services/logger';
 
+import { loggerService } from '../logger.service';
 import { RequestEmailAssetsDto } from './email-assets.dto';
 import { parseImageNameDto } from './email-assets.util';
 import { EmailSentService } from './email-sent/email-sent.service';
@@ -28,7 +28,7 @@ export class EmailAssetsController {
       this.emailSentService
         .increment(parse.imageId)
         .then(updated => {
-          if (!updated) logWarn(`not found email sent ${parse.imageId}`);
+          if (!updated) loggerService.logWarn(`not found email sent ${parse.imageId}`);
         })
         .catch(() => null);
     }
