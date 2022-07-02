@@ -1,0 +1,99 @@
+version: '3.5'
+
+services:
+  mysql8:
+    env_file:
+      - .env
+    container_name: mysql_container
+    image: mysql:8.0.22
+    restart: always
+    cap_add:
+      - SYS_NICE # CAP_SYS_NICE
+      - SYS_PTRACE
+      - SYS_RESOURCE
+    command: [
+        #'--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION',
+        # --innodb-dedicated-server=ON,
+        '--default-authentication-plugin=mysql_native_password'
+        ]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:3306
+    networks:
+      default:
+        ipv4_address: 172.18.0.50
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  phpmyadmin:
+    env_file:
+      - .env
+    image: phpmyadmin
+    container_name: phpmyadmin_container
+    restart: always
+    depends_on:
+      - mysql8
+    environment:
+      PMA_HOST: mysql8
+      PMA_USER: root
+      PMA_PASSWORD: ${ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
+    ports:
+      - 8080:80
+    networks:
+      default:
+        ipv4_address: 172.18.0.49
+    volumes:
+      - /sessions
+
+  phpmyadmin_external:
+    env_file:
+      - .env
+    image: phpmyadmin
+    container_name: phpmyadmin_external
+    restart: always
+    environment:
+      PMA_HOST: 3.232.11.2
+      PMA_USER: root
+      PMA_PASSWORD: ${ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
+    ports:
+      - 8081:80
+    volumes:
+      - /sessions
+
+  cache:
+    env_file: 
+     - .env
+    image: redis:alpine
+    container_name: redis_container
+    restart: always
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      default:
+        ipv4_address: 172.18.0.100
+    volumes:
+      - redis_data:/var/lib/redis
+      #- ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  default:
+    external: true
+    name: webproxy
