@@ -9,9 +9,9 @@ const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv }, socketServic
 export async function startServer() {
   const database = await createDatabase({
     ...dbConfig,
-    synchronize: isDevMode,
-    logging: ['error'],
-    // logging: ['error', 'query'],
+    synchronize: !!isDevMode,
+    // logging: ['error'],
+    logging: ['error', 'query'],
   });
 
   const closeServer = async () => {

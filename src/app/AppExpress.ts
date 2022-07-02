@@ -37,6 +37,7 @@ export class AppExpress {
     if (this.socketService) this.socketService.createFromExpress(this.server);
     return this;
   }
+
   private socketServer() {
     if (this.socketService) {
       this.socketService.init();
