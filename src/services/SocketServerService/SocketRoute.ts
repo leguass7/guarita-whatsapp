@@ -8,7 +8,7 @@ export type EventHandlerName = keyof ClientToServerEvents;
 export type EventHandlerValue<E extends EventHandlerName> = ClientToServerEvents[E];
 export type FeatureHandler = [EventHandlerName, EventHandlerValue<any>];
 
-type SocketRouteHandler<E extends EventHandlerName> = EventHandlerValue<E> extends (...a: infer U) => infer R
+export type SocketRouteHandler<E extends EventHandlerName> = EventHandlerValue<E> extends (...a: infer U) => infer R
   ? (b: SocketServerService, socket: Socket<ServerToClientEvents, ClientToServerEvents>, ...a: U) => R
   : never;
 

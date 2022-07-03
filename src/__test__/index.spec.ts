@@ -1,7 +1,5 @@
 import request, { SuperTest } from 'supertest';
 
-// import { AppExpress } from '#/app/AppExpress';
-
 import { env } from '../config';
 import { startServer } from '../index';
 

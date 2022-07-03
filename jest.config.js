@@ -14,7 +14,8 @@ module.exports = {
   // }
   moduleNameMapper: {
     '#/(.*)': '<rootDir>/src/$1',
-    "#useCases/(.*)": "<rootDir>/src/useCases/$1",
+    '#useCases/(.*)': '<rootDir>/src/useCases/$1',
+    '#socket/(.*)': '<rootDir>/src/useCases/_socket/$1',
     // '@alias/(.*)': '<rootDir>/src/path/to/alias/$1'
-  }
+  },
 };

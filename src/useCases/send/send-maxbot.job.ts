@@ -1,5 +1,6 @@
 import type { Job, JobOptions } from 'bull';
 
+import { env } from '#/config';
 import { MaxbotService, ISendTextResult } from '#/services/MaxbotService/index.ts';
 import { MaxbotException } from '#/services/MaxbotService/maxbot-exception';
 import { QueueService, IJob } from '#/services/QueueService';
@@ -36,6 +37,7 @@ export const sendMaxbotMessage: IJob<JobNames, SendMaxbotPayload> = {
     const { token, to, text } = data;
 
     // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
+    if (!env.MAXBOT_KEY) return { msgId: '0000' } as ISendTextResult;
 
     const maxbot = new MaxbotService({ token, timeout: 10000 });
 
@@ -69,6 +71,8 @@ export const sendMaxbotImage: IJob<JobNames, SendMaxbotPayload> = {
 
     //throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
     // return { status: 1, msg: 'test' };
+
+    if (!env.MAXBOT_KEY) return { msgId: '0000' } as ISendTextResult;
 
     const maxbot = new MaxbotService({ token, timeout: 10000 });
     const isReady = await maxbot.getStatus();
