@@ -2,9 +2,9 @@ import { SocketRouter } from '#/services/SocketServerService';
 
 const SocketDeviceRoute = SocketRouter();
 
-SocketDeviceRoute.use('device/count', async (sockerServerService, socket, req, cb) => {
+SocketDeviceRoute.use('device/count', async (sockerServerService, socket, req, res) => {
   console.log('req.phone', req.phone);
-  cb({ success: true, message: 'ok' });
+  res({ success: true, message: 'ok' });
 });
 
 export { SocketDeviceRoute };
