@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { prefix } from '#/config';
-import { cacheService } from '#/services/ChacheService/cache.service';
+import { cacheService } from '#/services/CacheService/cache.service';
 import { QueueService } from '#/services/QueueService';
 
 import { EmailSendRoute, sendEmailService } from './send-email/send-email.route';

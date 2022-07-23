@@ -3,7 +3,7 @@ import { createHash } from 'crypto';
 import { format } from 'date-fns';
 import type { ISendTextResult } from 'maxbotjs/dist';
 
-import type { CacheService } from '#/services/ChacheService/cache.service';
+import type { CacheService } from '#/services/CacheService/cache.service';
 import { LogClass } from '#/services/LoggerService/log-class.decorator';
 import type { FailedPromiseCallback } from '#/services/QueueService';
 import { loggerService } from '#/useCases/logger.service';

@@ -1,7 +1,7 @@
 import type { Job } from 'bull';
 
 import { HttpException } from '#/app/exceptions/HttpException';
-import type { CacheService } from '#/services/ChacheService';
+import type { CacheService } from '#/services/CacheService';
 import { LogClass } from '#/services/LoggerService/log-class.decorator';
 import type { SocketServerService } from '#/services/SocketServerService';
 import { loggerService } from '#/useCases/logger.service';

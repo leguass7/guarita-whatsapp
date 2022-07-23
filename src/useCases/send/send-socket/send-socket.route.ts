@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { cacheService } from '#/services/ChacheService/cache.service';
+import { cacheService } from '#/services/CacheService/cache.service';
 import { QueueService } from '#/services/QueueService';
 import { socketServerService } from '#/useCases/socket.service';
 import { sendLogService } from '#useCases/send/send-log/send-log.route';
