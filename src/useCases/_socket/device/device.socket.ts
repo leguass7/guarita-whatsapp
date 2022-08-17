@@ -1,11 +1,15 @@
+import { api } from '#/services/Api';
 import { SocketRouter } from '#/services/SocketServerService';
 
 const SocketDeviceRoute = SocketRouter();
 
-SocketDeviceRoute.use('device/count', async (sockerServerService, socket, req, res) => {
-  console.log('req.phone', req.phone);
-  console.log('req.waId', req.waId);
-  res({ success: true, message: 'ok' });
+const path = 'device/count';
+
+SocketDeviceRoute.use(path, async (sockerServerService, socket, req, res) => {
+  const response = await api.getDefault(path);
+  console.log('resposta do servidor guarita: ', response);
+
+  res({ success: true, message: 'estamos processando sua solicitação, por favor aguarde.' });
 });
 
 export { SocketDeviceRoute };

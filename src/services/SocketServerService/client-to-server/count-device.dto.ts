@@ -1,4 +1,3 @@
-export interface RequestCountDeviceDto {
-  waId?: string;
-  phone: string;
-}
+import { IRequestCommon } from './socker-client.dto';
+
+export type RequestCountDeviceDto = IRequestCommon;
