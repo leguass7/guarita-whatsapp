@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
 
 import type { SocketServerService } from '.';
-import { ClientToServerEvents } from './client-to-server/socker-client.dto';
+import { ClientToServerEvents } from './client-to-server/socket-client.dto';
 import { ServerToClientEvents } from './server-to-client/socket-server.dto';
 
 export type EventHandlerName = keyof ClientToServerEvents;

@@ -8,7 +8,7 @@ import type { IPayloadToken } from '#/useCases/auth/auth.dto';
 
 import type { LoggerService } from '../LoggerService';
 import { LogClass } from '../LoggerService/log-class.decorator';
-import type { ClientToServerEvents } from './client-to-server/socker-client.dto';
+import type { ClientToServerEvents } from './client-to-server/socket-client.dto';
 import type { RequestSendTextDto } from './server-to-client/send-text.dto';
 import type { ISocketClientResponse, ServerToClientCallback, ServerToClientEvents } from './server-to-client/socket-server.dto';
 import { EventHandlerName, EventHandlerValue, FeatureHandler, SocketRoute, SocketRouter } from './SocketRoute';
