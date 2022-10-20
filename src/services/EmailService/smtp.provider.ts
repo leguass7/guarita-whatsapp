@@ -17,8 +17,9 @@ export interface ISmtpConfig {
 
 export function createTransporterSMTP(config: ISmtpConfig, loggerService?: LoggerService): EmailServiceSender {
   if (!config?.auth?.user || !config?.auth?.pass || !config?.host) {
-    throw new Error('invalid_smtp_config');
+    throw new Error(`invalid_smtp_config-${config?.auth?.user}-${config?.auth?.pass}-${config?.host}`);
   }
+
   const sender: EmailServiceSender = async ({ from, html, subject, to }) => {
     try {
       let transporter = createTransport(config);
