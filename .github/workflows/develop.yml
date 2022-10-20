@@ -60,6 +60,7 @@ jobs:
       - name: 🚔 Test Lint
         run: yarn lint
 
+
       - name: 🚀 Test App
         run: yarn test
         env:
@@ -74,6 +75,13 @@ jobs:
           MAXBOT_KEY: ${{secrets.MAXBOT_KEY}}
           WHATSAPP_TEST: ${{secrets.WHATSAPP_TEST}}
           TEXT_MESSAGE_TEST: ${{github.event.number}}
+
+          MAIL_FROM: Atendimento <atendimento01@dessistemas.com.br>
+          SMTP_HOST: ${{secrets.SMTP_HOST}}
+          SMTP_PORT: 465
+          SMTP_USER: ${{secrets.SMTP_USER}}
+          SMTP_PASS: ${{secrets.SMTP_PASS}}
+          SMTP_SECURE: 1
 
       - name: 😬 Test Build
         run: yarn build
