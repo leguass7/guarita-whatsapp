@@ -1,4 +1,3 @@
-export interface RequestCountDeviceDto {
-  waId?: string;
-  phone: string;
-}
+import { IRequestCommon } from './socket-client.dto';
+
+export type RequestCountDeviceDto = IRequestCommon;
