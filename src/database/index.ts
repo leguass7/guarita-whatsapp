@@ -7,9 +7,9 @@ import { entities } from './entities';
 export const dataSource = new DataSourceService({
   type: 'mysql',
   // charset: 'utf8mb4_unicode_ci',
-  // synchronize: !!isDevMode,
+  synchronize: !!isDevMode,
   // synchronize: true,
-  synchronize: false,
+  // synchronize: false,
   entities,
   ...dbConfig,
   logging: ['error'],
