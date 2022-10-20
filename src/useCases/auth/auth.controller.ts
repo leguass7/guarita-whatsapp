@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 
 @Catch()
 export class AuthController {
-  constructor(private authService: AuthService, private googleService: GoogleService) {}
+  constructor(private readonly authService: AuthService, private readonly googleService: GoogleService) {}
 
   async googleCode(req: IRequestAuthorize, res: Response, _next: NextFunction): Promise<any> {
     const { query } = req;

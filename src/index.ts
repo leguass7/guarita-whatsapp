@@ -1,27 +1,23 @@
 import { AppExpress } from './app/AppExpress';
-import { httpPort, isDevMode, dbConfig, nodeEnv } from './config';
-import { createDatabase } from './database';
+import { httpPort, nodeEnv } from './config';
+import { dataSource } from './database';
 import { loggerService } from './useCases/logger.service';
 import { socketServerService } from './useCases/socket.service';
 
 const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv }, socketServerService, loggerService);
 
 export async function startServer() {
-  const database = await createDatabase({
-    ...dbConfig,
-    synchronize: !!isDevMode,
-    logging: ['error'],
-    // logging: ['error', 'query'],
-  });
+  await dataSource.initialize();
 
   const closeServer = async () => {
-    if (database?.isConnected) database?.close();
+    if (dataSource?.isInitialized) dataSource?.destroy();
     await serverHttp.close();
     serverHttp.express = null;
   };
 
-  if (database?.isConnected) {
-    loggerService.logging('DATABASE CONNECTED: ', dbConfig.host);
+  if (dataSource?.isInitialized) {
+    const conn = dataSource.getConnectionOptions();
+    loggerService.logging('DATABASE CONNECTED: ', conn?.master?.host, conn?.master?.database);
     return {
       serverHttp,
       server: await serverHttp.listen(),

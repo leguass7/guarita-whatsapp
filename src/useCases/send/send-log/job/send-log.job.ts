@@ -1,11 +1,11 @@
 import { format } from 'date-fns';
 
 import { env, isDevMode } from '#/config';
-import { MailService } from '#/services/EmailService';
+import type { EmailService } from '#/services/EmailService';
+import type { LoggerService } from '#/services/LoggerService';
 import type { IJob, QueueService, JobOptions } from '#/services/QueueService';
-import { loggerService } from '#/useCases/logger.service';
+import type { SendLogService } from '#/useCases/send/send-log/send-log.service';
 
-import { SendLogService } from '../send-log.service';
 import { buildMailBody, MailFailedBody } from './send-log.html';
 
 export type SendLogJobNames = 'SendFailures' | 'SendLogBody';
@@ -22,7 +22,7 @@ export const defaultJobOptions: JobOptions = {
   backoff: { type: 'exponential', delay: 60000 * 30 },
 };
 
-export function createSendLogJob(sendLogService: SendLogService): IJob<SendLogJobNames, SendLogPayload> {
+export function sendLogFailuresJob(sendLogService: SendLogService, mailService: EmailService): IJob<SendLogJobNames, SendLogPayload> {
   return {
     name: 'SendFailures',
     handle: async () => {
@@ -37,7 +37,7 @@ export function createSendLogJob(sendLogService: SendLogService): IJob<SendLogJo
 
       const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `,Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
-      const mailService = new MailService('smtp', loggerService);
+      // const mailService = new MailService('smtp', loggerService);
       const sent = await mailService.send({
         from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
         to,
@@ -50,14 +50,14 @@ export function createSendLogJob(sendLogService: SendLogService): IJob<SendLogJo
   };
 }
 
-export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
+export const sendLogJobBody = (mailService: EmailService): IJob<SendLogJobNames, SendLogPayloadBody> => ({
   name: 'SendLogBody',
   handle: async ({ data }) => {
     const { subject, ...rest } = data;
 
     const to = `Leandro Sbrissa <leandro.sbrissa@hotmail.com>${!isDevMode ? `, Joaquim <atendimento01@dessistemas.com.br>` : ''}`;
 
-    const mailService = new MailService('smtp', loggerService);
+    // const mailService = new MailService('smtp', loggerService);
     const sent = await mailService.send({
       from: 'Webmaster Avatar <webmaster@avatarsolucoesdigitais.com.br>',
       to,
@@ -67,20 +67,38 @@ export const sendLogJobBody: IJob<SendLogJobNames, SendLogPayloadBody> = {
 
     return sent;
   },
-};
+});
 
-export async function repeatRegister(queue: QueueService<SendLogJobNames, SendLogPayload>) {
-  const job = await queue
-    .setWorker('SendFailures')
-    .trying(({ data, failedReason }) => {
-      loggerService.logError(`SendFailures TRYING`, failedReason, data.startedIn);
-    })
-    .failed(({ data, failedReason }) => {
-      loggerService.logError(`SendFailures ERROR`, failedReason, data.startedIn);
-    })
-    .success(({ data }) => {
-      loggerService.logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
-    })
-    .save({ startedIn: new Date() }, { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true });
-  loggerService.logging('repeatRegister', job.name, job.id);
+export function repeatRegister(loggerService: LoggerService) {
+  return async (queue: QueueService<SendLogJobNames, SendLogPayload>) => {
+    const job = await queue
+      .setWorker('SendFailures')
+      .trying(({ data, failedReason }) => {
+        loggerService.logError(`SendFailures TRYING`, failedReason, data.startedIn);
+      })
+      .failed(({ data, failedReason }) => {
+        loggerService.logError(`SendFailures ERROR`, failedReason, data.startedIn);
+      })
+      .success(({ data }) => {
+        loggerService.logging(`RELATÓRIO DE FALHAS ENVIADO POR E-MAIL ${env.CRON_SENDLOGS} ${data.startedIn}`);
+      })
+      .save({ startedIn: new Date() }, { repeat: { cron: env.CRON_SENDLOGS }, removeOnComplete: true });
+    //
+    loggerService.logging('repeatRegister', job.name, job.id);
+  };
+}
+
+// ------------------
+
+export function createSendLogBodyJob(mailService: EmailService) {
+  return {
+    sendLogJobBody: sendLogJobBody(mailService),
+  };
+}
+
+export function createSendLogJob(loggerService: LoggerService, sendLogService: SendLogService, mailService: EmailService) {
+  return {
+    sendLogFailuresJob: sendLogFailuresJob(sendLogService, mailService),
+    repeatRegister: repeatRegister(loggerService),
+  };
 }

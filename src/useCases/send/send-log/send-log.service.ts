@@ -1,11 +1,12 @@
 import { format } from 'date-fns';
-import { FindConditions, FindManyOptions, getRepository, In, Like } from 'typeorm';
+import { FindManyOptions, In, Like, FindOptionsWhere } from 'typeorm';
 
 import { isDevMode } from '#/config';
 import { makeArray } from '#/helpers/array';
 import { isDefined } from '#/helpers/validation';
+import type { DataSourceService } from '#/services/DataSourceService';
+import type { LoggerService } from '#/services/LoggerService';
 import { LogClass } from '#/services/LoggerService/log-class.decorator';
-import { loggerService } from '#/useCases/logger.service';
 
 import type { SendLogPayloadBody, SendLogsQueue } from './job/send-log.job';
 import type { CreateSendLog, FilterSendLogDto } from './send-log.dto';
@@ -13,17 +14,22 @@ import { SendLog } from './send-log.entity';
 
 @LogClass
 export class SendLogService {
-  constructor(private sendLogsBodyQueue: SendLogsQueue) {}
+  constructor(
+    private readonly dataSource: DataSourceService,
+    private readonly sendLogsBodyQueue: SendLogsQueue,
+    private readonly loggerService: LoggerService,
+  ) {}
   async create(data: CreateSendLog) {
-    const repository = getRepository(SendLog);
+    const repository = this.dataSource.getRepository(SendLog);
     const contactData = repository.create(data);
     const result = await repository.save(contactData);
     return result;
   }
 
   async findByDate(date: Date, { status, eventType }: FilterSendLogDto = {}) {
-    const repository = getRepository(SendLog);
-    const where: FindConditions<SendLog> = {
+    const repository = this.dataSource.getRepository(SendLog);
+    const where: FindOptionsWhere<SendLog> = {
+      // @ts-ignore
       scheduled: Like(`%${format(date, 'yyyy-MM-dd')}%`),
       // eventType: In(['failed', 'success']),
     };
@@ -35,13 +41,13 @@ export class SendLogService {
   }
 
   async find(filter: FindManyOptions<SendLog>) {
-    const repository = getRepository(SendLog);
+    const repository = this.dataSource.getRepository(SendLog);
     const result = await repository.find(filter);
     return result;
   }
 
-  async findOne(where: FindConditions<SendLog>) {
-    const repository = getRepository(SendLog);
+  async findOne(where: FindOptionsWhere<SendLog>) {
+    const repository = this.dataSource.getRepository(SendLog);
     const result = await repository.findOne({ where });
     return result;
   }
@@ -65,9 +71,9 @@ export class SendLogService {
 
     const job = await this.sendLogsBodyQueue
       .setWorker('SendLogBody')
-      .trying(({ failedReason, attemptsMade }) => loggerService.logError('SendLogService TENTANDO:', attemptsMade, failedReason), true)
-      .failed(({ failedReason }) => loggerService.logError('SendLogService FALHOU:', failedReason), true)
-      .success(() => loggerService.logging('SendLogService ENVIADO SendLogBody:', subject), true)
+      .trying(({ failedReason, attemptsMade }) => this.loggerService.logError('SendLogService TENTANDO:', attemptsMade, failedReason), true)
+      .failed(({ failedReason }) => this.loggerService.logError('SendLogService FALHOU:', failedReason), true)
+      .success(() => this.loggerService.logging('SendLogService ENVIADO SendLogBody:', subject), true)
       .save(payload, { removeOnComplete: true, removeOnFail: true });
     return job;
   }

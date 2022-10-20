@@ -1,8 +1,8 @@
 import { baseEmailAssets } from '#/config';
+import type { LoggerService } from '#/services/LoggerService';
 import { LogClass } from '#/services/LoggerService/log-class.decorator';
-import type { EmailSentService } from '#/useCases/email';
 import { setImageNameDto } from '#/useCases/email/email-assets.util';
-import { loggerService } from '#/useCases/logger.service';
+import type { EmailSentService } from '#/useCases/email/email-sent/email-sent.service';
 
 import type { SendEmailDto } from './send-email.dto';
 import type { ContingencyContext, SendEmailHbs, TemplateTrackers } from './send-email.hbs';
@@ -25,7 +25,12 @@ type ContingencyData = {
 
 @LogClass
 export class SendEmailService {
-  constructor(private emailSentService: EmailSentService, private sendEmailQueue: SendEmailQueueService, private sendEmailHbs: SendEmailHbs) {}
+  constructor(
+    private readonly loggerService: LoggerService,
+    private readonly emailSentService: EmailSentService,
+    private readonly sendEmailQueue: SendEmailQueueService,
+    private readonly sendEmailHbs: SendEmailHbs,
+  ) {}
 
   async getTrackerImages({ makeType, jobId, sendLogId }: ContingencyData = {}): Promise<TemplateTrackers> {
     const { url } = baseEmailAssets;
@@ -61,7 +66,7 @@ export class SendEmailService {
       .setWorker('SendHtmlEmailJob')
       .trying(() => null, true)
       .failed(() => null, true)
-      .success(() => loggerService.logging(`CONTINGENCY EMAIL: ${jobId} ${email}`), true)
+      .success(() => this.loggerService.logging(`CONTINGENCY EMAIL: ${jobId} ${email}`), true)
       .save<SendContingencyEmailPayload>({ email, subject, html });
     return { job };
   }

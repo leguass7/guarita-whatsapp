@@ -1,4 +1,4 @@
-import { Token } from './token.entity';
+import type { Token } from './token.entity';
 
 export type CreateTokenDto = Omit<Token, 'id'>;
 

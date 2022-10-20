@@ -1,5 +1,6 @@
 import http from 'http';
 import { verify } from 'jsonwebtoken';
+import { EventEmitter } from 'node:events';
 import { Server as ServerIo, Socket } from 'socket.io';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -11,16 +12,19 @@ import { LogClass } from '../LoggerService/log-class.decorator';
 import type { ClientToServerEvents } from './client-to-server/socker-client.dto';
 import type { RequestSendTextDto } from './server-to-client/send-text.dto';
 import type { ISocketClientResponse, ServerToClientCallback, ServerToClientEvents } from './server-to-client/socket-server.dto';
+import { SocketServerEmitterHandler, SocketServerEvent, SocketServerEventPayload } from './socker-server.emitter';
 import { EventHandlerName, EventHandlerValue, FeatureHandler, SocketRoute, SocketRouter } from './SocketRoute';
 
 const cors = { origin: '*' };
 
 export { SocketRoute, SocketRouter };
 
+export type SocketClient = Socket<ClientToServerEvents, ServerToClientEvents>;
+
 export interface ISocketClient {
   id: string;
   auth: IPayloadToken;
-  socket: Socket<ClientToServerEvents, ServerToClientEvents>;
+  socket: SocketClient;
   latence: number;
 }
 
@@ -29,10 +33,28 @@ export class SocketServerService {
   public io: ServerIo<ClientToServerEvents, ServerToClientEvents>;
   public clients: ISocketClient[];
   private features: FeatureHandler[];
+  private diconnectedAs: Date;
+  private emitter = new EventEmitter();
 
   constructor(private readonly loggerService: LoggerService) {
     this.clients = [];
     this.features = [];
+  }
+
+  hasListener<T extends SocketServerEvent>(event: T) {
+    return !!(this.emitter.listenerCount(event) > 0);
+  }
+
+  emit<T extends SocketServerEvent>(event: T, payload: SocketServerEventPayload<T>) {
+    if (this.hasListener(event)) this.emitter.emit(event, payload);
+  }
+
+  on<T extends SocketServerEvent>(event: T, fn: SocketServerEmitterHandler<T>) {
+    this.emitter.on(event, fn);
+  }
+
+  off<T extends SocketServerEvent>(event: T, fn: SocketServerEmitterHandler<T>) {
+    this.emitter.on(event, fn);
   }
 
   private addClient(data: ISocketClient) {
@@ -102,10 +124,13 @@ export class SocketServerService {
       const id = `${socket?.id}`;
 
       this.addClient({ id, auth: socket.auth, socket, latence: 1000 });
+      this.emit('onConnect', { id, auth: socket.auth, socket, latence: 1000 });
       this.loggerService.logging(`USER CONNECTED`, id);
 
       socket.on('disconnect', () => {
         this.removeClient(id);
+        this.diconnectedAs = new Date();
+        this.emit('onDisconnect', socket);
         this.loggerService.logging(`USER DISCONNECTED`, id);
       });
 

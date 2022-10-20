@@ -1,4 +1,4 @@
-import { EnventType, SendLog } from './send-log.entity';
+import type { EnventType, SendLog } from './send-log.entity';
 
 export type CreateSendLog = Omit<SendLog, 'id'>;
 

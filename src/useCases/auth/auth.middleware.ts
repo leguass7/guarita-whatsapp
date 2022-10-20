@@ -1,11 +1,10 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
 import { HttpException } from '#/app/exceptions/HttpException';
 import { jwtConfig } from '#/config';
 
-import { IPayloadToken } from './auth.dto';
-// import { decodeToken } from './auth.helpers';
+import type { IPayloadToken } from './auth.dto';
 
 export function requestHeaderToken(req: Request) {
   const { headers, body, query } = req;

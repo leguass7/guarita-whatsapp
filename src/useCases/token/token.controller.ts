@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
 
-import { TokenService } from './token.service';
+import type { TokenService } from './token.service';
 
 @Catch()
 export class TokenController {

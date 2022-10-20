@@ -2,8 +2,8 @@ import { Router } from 'express';
 
 import { authMiddleware } from '#/useCases/auth/auth.middleware';
 
-import { AuthRoute } from './auth/auth.route';
-import { ContactRoute } from './contact/contact.route';
+import { AuthRoute } from './auth';
+import { ContactRoute } from './contact';
 import { EmailRoute } from './email';
 import { SendRoute } from './send/send.route';
 import { TokenRoute } from './token/token.route';

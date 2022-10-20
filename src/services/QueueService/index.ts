@@ -90,7 +90,7 @@ export class QueueService<K extends string = any, T = any> {
     return worker;
   }
 
-  public onInit(callback: (q: this) => void) {
+  public onInit(callback: (q: this) => void | Promise<void>) {
     this.starters.push(callback);
   }
 

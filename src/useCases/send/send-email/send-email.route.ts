@@ -3,11 +3,15 @@ import { Router } from 'express';
 import { prefix } from '#/config';
 import { QueueService } from '#/services/QueueService';
 import { emailSentService } from '#/useCases/email';
+import { loggerService } from '#/useCases/logger.service';
+import { smtpService } from '#/useCases/smtp.service';
 
 import { SendEmailController } from './send-email.controller';
 import { SendEmailHbs } from './send-email.hbs';
-import { defaultJobOptions, sendHtmlEmailJob, sendGeneralEmailJob } from './send-email.job';
+import { createSendHtmlEmailJob, defaultJobOptions } from './send-email.job';
 import { SendEmailService } from './send-email.service';
+
+const { sendHtmlEmailJob, sendGeneralEmailJob } = createSendHtmlEmailJob(smtpService);
 
 const sendEmailQueue = new QueueService('SEND_EMAIL_QUEUE', [sendHtmlEmailJob, sendGeneralEmailJob], {
   defaultJobOptions,
@@ -16,7 +20,7 @@ const sendEmailQueue = new QueueService('SEND_EMAIL_QUEUE', [sendHtmlEmailJob, s
 });
 
 const sendEmailHbs = new SendEmailHbs();
-const sendEmailService = new SendEmailService(emailSentService, sendEmailQueue, sendEmailHbs);
+const sendEmailService = new SendEmailService(loggerService, emailSentService, sendEmailQueue, sendEmailHbs);
 const controller = new SendEmailController(sendEmailService);
 const EmailSendRoute = Router();
 

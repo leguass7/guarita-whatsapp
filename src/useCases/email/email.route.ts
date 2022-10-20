@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
 import { baseEmailAssets } from '#/config';
+import { dataSource } from '#/database';
 
 import { EmailAssetsController } from './email-assets.controller';
 import { EmailSentService } from './email-sent/email-sent.service';
 
-const emailSentService = new EmailSentService();
+const emailSentService = new EmailSentService(dataSource);
 const assetsController = new EmailAssetsController(emailSentService);
 const EmailRoute = Router();
 

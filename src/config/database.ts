@@ -1,11 +1,12 @@
-import { ConnectionOptions } from 'typeorm';
+import type { DataSourceOptions } from 'typeorm';
 
 import { env } from './env';
 
 export const dbType = process.env.DB_TYPE as 'mysql' | 'postgres';
 
-export const dbConfig: ConnectionOptions & { host: string } = {
-  type: dbType,
+export const dbConfig: DataSourceOptions & { host: string } = {
+  type: 'mysql',
+  url: env.DB_URL,
   host: env.DB_HOST,
   port: env.DB_PORT,
   database: env.DB_DATABASE,
@@ -14,3 +15,11 @@ export const dbConfig: ConnectionOptions & { host: string } = {
 };
 
 export const urlConnection = env.DB_URL;
+
+export function getDbConfig(master: boolean) {
+  // const url = master ? env.DB_URL : env.DB_URL_SLAVE;
+  // if (url) return { url };
+  // return master ? masterConfig : slaveConfig;
+  if (master) return { url: env.DB_URL };
+  return { url: env.DB_URL };
+}

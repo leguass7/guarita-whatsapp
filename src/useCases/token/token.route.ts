@@ -1,9 +1,11 @@
 import { Router } from 'express';
 
+import { dataSource } from '#/database';
+
 import { TokenController } from './token.controller';
 import { TokenService } from './token.service';
 
-const tokenService = new TokenService();
+const tokenService = new TokenService(dataSource);
 const tokenController = new TokenController(tokenService);
 
 const TokenRoute = Router();

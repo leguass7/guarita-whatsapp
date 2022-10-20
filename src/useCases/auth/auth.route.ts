@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
 import { googleService } from '#/useCases/google.service';
+import { tokenService } from '#/useCases/token/token.route';
 
-import { tokenService } from '../token/token.route';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { getAuthGoogleSchema, postAuthSchema } from './auth.validation';

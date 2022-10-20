@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express';
 import { resolve } from 'path';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
@@ -6,13 +6,13 @@ import { pathVolume } from '#/config';
 import { fileExists } from '#/helpers/files';
 
 import { loggerService } from '../logger.service';
-import { RequestEmailAssetsDto } from './email-assets.dto';
+import type { RequestEmailAssetsDto } from './email-assets.dto';
 import { parseImageNameDto } from './email-assets.util';
-import { EmailSentService } from './email-sent/email-sent.service';
+import type { EmailSentService } from './email-sent/email-sent.service';
 
 @Catch()
 export class EmailAssetsController {
-  constructor(private emailSentService: EmailSentService) {}
+  constructor(private readonly emailSentService: EmailSentService) {}
 
   async sendFile(req: RequestEmailAssetsDto, res: Response, _next: NextFunction) {
     const { imageName } = req.params;

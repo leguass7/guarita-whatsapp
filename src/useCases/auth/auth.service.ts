@@ -9,7 +9,7 @@ import { IPayloadToken } from './auth.dto';
 
 @LogClass
 export class AuthService {
-  constructor(private tokenService: TokenService) {}
+  constructor(private readonly tokenService: TokenService) {}
 
   async generateToken(payload: IPayloadToken) {
     const { secret, expiresIn } = jwtConfig;

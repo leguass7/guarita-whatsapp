@@ -3,4 +3,4 @@ import { EmailSent } from '#/useCases/email/email-sent/email-sent.entity';
 import { SendLog } from '#/useCases/send/send-log/send-log.entity';
 import { Token } from '#/useCases/token/token.entity';
 
-export const entities = [Token, Contact, SendLog, EmailSent];
+export const entities = [Token, SendLog, EmailSent, Contact];

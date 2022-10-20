@@ -18,7 +18,7 @@ export { EmailException } from './email.exception';
  * Configure em `.env` a variável `MAIL_FROM`
  */
 @LogClass
-export class MailService {
+export class EmailService {
   public sender: EmailServiceSender;
 
   constructor(private provider: MailServiceProvider = 'smtp', private readonly loggerService: LoggerService) {

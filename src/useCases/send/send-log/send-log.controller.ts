@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { Catch } from '#/app/exceptions/catch-controller.decorator';
 import { HttpException } from '#/app/exceptions/HttpException';
@@ -9,7 +9,7 @@ import type { SendLogService } from './send-log.service';
 
 @Catch()
 export class SendLogController {
-  constructor(private sendLogService: SendLogService) {}
+  constructor(private readonly sendLogService: SendLogService) {}
 
   async now(req: Request, res: Response, _next: NextFunction) {
     const day = tryDate(req?.query?.day as string) || new Date();
