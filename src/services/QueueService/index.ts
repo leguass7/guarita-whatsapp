@@ -28,7 +28,7 @@ export class QueueService<K extends string = any, T = any> {
   private starters: ((q: QueueService<K, T>) => void)[];
   public queue: Queue;
 
-  constructor(private queueName: string, public jobs: IJob<K, T | unknown>[], queueOptions: QueueOptions = {}) {
+  constructor(private readonly queueName: string, public jobs: IJob<K, T | unknown>[], queueOptions: QueueOptions = {}) {
     this.workers = [];
     this.starters = [];
     this.queue = new Bull(queueName, { redis: redisConfig, ...queueOptions });

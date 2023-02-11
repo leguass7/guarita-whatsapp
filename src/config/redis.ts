@@ -1,8 +1,8 @@
-import type { RedisOptions } from 'ioredis';
+import { QueueOptions } from 'bull';
 
 import { env, isDevMode } from './env';
 
-export const redisConfig: RedisOptions = {
+export const redisConfig: QueueOptions['redis'] = {
   host: isDevMode ? 'localhost' : env.REDIS_HOST,
   port: env.REDIS_PORT,
   password: env.REDIS_PASSWORD,
