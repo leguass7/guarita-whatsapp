@@ -1,19 +1,27 @@
+import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+
 import { dbConfig } from '#/config/database';
-import { isDevMode } from '#/config/env';
+// import { isDevMode } from '#/config/env';
 import { DataSourceService } from '#/services/DataSourceService';
 
 import { entities } from './entities';
 
+const config: MysqlConnectionOptions = {
+  ...dbConfig,
+  connectTimeout: 60 * 60 * 1000,
+  acquireTimeout: 60 * 60 * 1000,
+};
+
 export const dataSource = new DataSourceService({
   type: 'mysql',
   // charset: 'utf8mb4_unicode_ci',
-  synchronize: !!isDevMode,
+  synchronize: false,
   // synchronize: true,
   // synchronize: false,
   entities,
-  ...dbConfig,
-  logging: ['error'],
-  // logging: ['error', 'query'],
+  // logging: ['error'],
+  logging: ['error', 'query'],
+  ...config,
 
   //
 });

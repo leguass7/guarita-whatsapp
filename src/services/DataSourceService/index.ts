@@ -17,6 +17,8 @@ function parsedbUrl(url = ''): MysqlConnectionCredentialsOptions {
 export class DataSourceService extends DataSource {
   constructor(dbOptions: DataSourceOptions) {
     super(dbOptions);
+    // eslint-disable-next-line no-console
+    console.log(dbOptions);
   }
 
   // FIXME: melhorar tratamento de erros

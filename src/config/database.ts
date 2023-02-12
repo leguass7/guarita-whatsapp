@@ -1,10 +1,10 @@
-import type { DataSourceOptions } from 'typeorm';
+import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
 import { env } from './env';
 
 export const dbType = process.env.DB_TYPE as 'mysql' | 'postgres';
 
-export const dbConfig: DataSourceOptions & { host: string } = {
+export const dbConfig: MysqlConnectionOptions = {
   type: 'mysql',
   url: env.DB_URL,
   host: env.DB_HOST,
