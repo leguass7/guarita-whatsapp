@@ -19,8 +19,8 @@ export const dataSource = new DataSourceService({
   // synchronize: true,
   // synchronize: false,
   entities,
-  // logging: ['error'],
-  logging: ['error', 'query'],
+  logging: ['error'],
+  // logging: ['error', 'query'],
   ...config,
 
   //
