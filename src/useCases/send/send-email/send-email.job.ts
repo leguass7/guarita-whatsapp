@@ -72,7 +72,7 @@ export const defaultJobOptions: JobOptions = {
   delay: 10,
   attempts: 2,
   timeout: 10000,
-  // backoff: { type: 'exponential', delay: 60000 * 30 },
+  backoff: { type: 'exponential', delay: 60000 * 30 },
 };
 
 export function createSendHtmlEmailJob(smtpService: EmailService) {
