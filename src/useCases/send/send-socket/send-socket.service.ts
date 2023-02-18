@@ -1,10 +1,9 @@
 import type { Job } from 'bull';
 
-import { HttpException } from '#/app/exceptions/HttpException';
 import type { CacheService } from '#/services/CacheService';
+import type { LoggerService } from '#/services/LoggerService';
 import { LogClass } from '#/services/LoggerService/log-class.decorator';
 import type { SocketServerService } from '#/services/SocketServerService';
-import { loggerService } from '#/useCases/logger.service';
 
 import type { CreateSendLog } from '../send-log/send-log.dto';
 import type { EnventType } from '../send-log/send-log.entity';
@@ -15,10 +14,11 @@ import type { SendSocketQueueService } from './send-socket.job';
 @LogClass
 export class SendSocketService {
   constructor(
-    private socketServerService: SocketServerService,
-    private sendSocketQueue: SendSocketQueueService,
-    private cacheService: CacheService,
-    private sendLogService: SendLogService,
+    private readonly loggerService: LoggerService,
+    private readonly socketServerService: SocketServerService,
+    private readonly sendSocketQueue: SendSocketQueueService,
+    private readonly cacheService: CacheService,
+    private readonly sendLogService: SendLogService,
   ) {}
 
   private processLog({ eventType, ...data }: CreateSendLog) {
@@ -33,7 +33,7 @@ export class SendSocketService {
       const has = await this.sendLogService.findOne({ jobId, attemptsMade, eventType });
       if (has) return null;
       const createdId = await saveData({ ...data, eventType, response, createdAt: new Date(), jobId, message });
-      loggerService.logError(`SendSocketService processFailed type=${eventType} to=${data.to} ${message} created:${createdId}`);
+      this.loggerService.logError(`SendSocketService processFailed type=${eventType} to=${data.to} ${message} created:${createdId}`);
       return createdId;
     };
 
@@ -66,8 +66,8 @@ export class SendSocketService {
     const job = await this.sendSocketQueue
       .setWorker('SendSocketText')
       .trying(process('trying'))
-      .failed(process('failed'))
-      .success(process('success'))
+      .failed(process('failed'), true)
+      .success(process('success'), true)
       .save({ ...data }, { priority, removeOnComplete: true });
 
     return { jobId: job?.id };
@@ -76,15 +76,16 @@ export class SendSocketService {
   async sendText(data: RequestSendSocketTextDto) {
     const response = await this.socketServerService.sendText(data);
     if (!response?.success) {
-      throw new HttpException(503, `service_unavailable`);
+      // throw new HttpException(503, `service_unavailable`);
+      return null;
     }
-    loggerService.logging('SendSocketService sendText:', data?.to, response?.messageId);
+    this.loggerService.logging('SendSocketService sendText:', data?.to, response?.messageId);
     return response;
   }
 
   async getStatus() {
     const response = await this.socketServerService.getStatus();
-    loggerService.logging('SendSocketService getStatus:', response?.message);
+    this.loggerService.logging('SendSocketService getStatus:', response?.message);
     return response;
   }
 }

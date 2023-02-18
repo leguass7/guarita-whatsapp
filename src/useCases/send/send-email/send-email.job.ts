@@ -14,7 +14,7 @@ export type SendGeneralEmailPayload = {
   text: string;
 };
 
-export type JobNames = 'SendHtmlEmailJob' | 'sendGeneralEmailJob';
+export type JobNames = 'SendHtmlEmailJob' | 'sendGeneralEmailJob' | 'SendGeneralEmailJobSg' | 'SendHtmlEmailJobSg';
 
 export type SendEmailQueueService = QueueService<JobNames, SendContingencyEmailPayload | SendGeneralEmailPayload>;
 
@@ -33,10 +33,35 @@ const sendGeneralEmailJob = (mailService: EmailService): IJob<JobNames, SendGene
   return {
     name: 'sendGeneralEmailJob',
     async handle({ data }) {
-      const { email: to, text, subject } = data;
+      const { email: to, text, subject = 'SEM ASSUNTO' } = data;
 
       // throw new MaxbotException('teste', { msg: 'Failure', status: 0 });
       // return { status: 1, msg: 'test' };
+      const response = await mailService.send({ to, html: text, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}` });
+      return response as EmailServiceResponseDto;
+    },
+  };
+};
+
+const sendHtmlEmailJobSg = (mailService: EmailService): IJob<JobNames, SendContingencyEmailPayload> => ({
+  name: 'SendHtmlEmailJobSg',
+  async handle({ data }) {
+    const { email: to, html, subject } = data;
+
+    // const mailService = new MailService('smtp', loggerService);
+    const response = await mailService.send({ to, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}`, html });
+    return response?.messageId;
+  },
+});
+
+const sendGeneralEmailJobSg = (mailService: EmailService): IJob<JobNames, SendGeneralEmailPayload> => {
+  return {
+    name: 'SendGeneralEmailJobSg',
+    async handle({ data }) {
+      const { email: to, text, subject = 'SEM ASSUNTO' } = data;
+
+      throw new Error('error_test');
+
       const response = await mailService.send({ to, html: text, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}` });
       return response as EmailServiceResponseDto;
     },
@@ -49,12 +74,14 @@ export const defaultJobOptions: JobOptions = {
   delay: 10,
   attempts: 2,
   timeout: 10000,
-  backoff: { type: 'exponential', delay: 60000 * 30 },
+  // backoff: { type: 'exponential', delay: 60000 * 30 },
 };
 
 export function createSendHtmlEmailJob(smtpService: EmailService) {
   return {
     sendHtmlEmailJob: sendHtmlEmailJob(smtpService),
     sendGeneralEmailJob: sendGeneralEmailJob(smtpService),
+    sendHtmlEmailJobSg: sendHtmlEmailJobSg(smtpService),
+    sendGeneralEmailJobSg: sendGeneralEmailJobSg(smtpService),
   };
 }

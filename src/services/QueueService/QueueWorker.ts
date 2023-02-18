@@ -3,10 +3,12 @@ import { CompletedEventCallback, FailedEventCallback, Job, JobOptions, Queue } f
 import { loggerService } from '#/useCases/logger.service';
 
 export type FailedPromiseCallback<T, R = any> = (job: Job<T>, result: any) => Promise<R>;
+export type FailedCallback<T> = FailedEventCallback<T>; // | Promise<FailedEventCallback<T>>;
+export type CompletedCallback<T> = CompletedEventCallback<T>; // | Promise<CompletedEventCallback<T>>;
 export interface QueueWorkerCallback<T = any> {
-  success?: [CompletedEventCallback<T>, boolean];
-  trying?: [FailedEventCallback<T>, boolean];
-  failed?: [FailedEventCallback<T>, boolean];
+  success?: [CompletedCallback<T>, boolean];
+  trying?: [FailedCallback<T>, boolean];
+  failed?: [FailedCallback<T>, boolean];
 }
 
 export type ProcessType = keyof QueueWorkerCallback;
@@ -21,17 +23,17 @@ export class QueueWorker<T = any, K extends string = any> {
     this.queueWorkerCallback = {};
   }
 
-  public success(callback?: CompletedEventCallback<T>, removeWorkerAfter?: boolean) {
+  public success(callback?: CompletedCallback<T>, removeWorkerAfter?: boolean) {
     this.queueWorkerCallback.success = [callback, !!removeWorkerAfter];
     return this;
   }
 
-  public trying(callback?: FailedEventCallback<T>, removeWorkerAfter?: boolean) {
+  public trying(callback?: FailedCallback<T>, removeWorkerAfter?: boolean) {
     this.queueWorkerCallback.trying = [callback, !!removeWorkerAfter];
     return this;
   }
 
-  public failed(callback?: FailedEventCallback<T>, removeWorkerAfter?: boolean) {
+  public failed(callback?: FailedCallback<T>, removeWorkerAfter?: boolean) {
     this.queueWorkerCallback.failed = [callback, !!removeWorkerAfter];
     return this;
   }

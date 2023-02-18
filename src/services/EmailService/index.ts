@@ -22,6 +22,13 @@ export class EmailService {
   public sender: EmailServiceSender;
 
   constructor(private provider: MailServiceProvider = 'smtp', private readonly loggerService: LoggerService) {
+    if (provider === 'sendgrid' && !sendgridConfig?.key) throw new Error('invalid_sendgrid_config');
+    if (provider === 'smtp') {
+      if (!smtpConfig?.auth?.user || !smtpConfig?.auth?.pass || !smtpConfig?.host) {
+        throw new Error(`invalid_smtp_config`);
+      }
+    }
+
     this.sender = this.provider === 'smtp' ? createTransporterSMTP(smtpConfig, this.loggerService) : createTransporterSG(sendgridConfig);
     return this;
   }
