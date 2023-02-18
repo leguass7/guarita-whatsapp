@@ -18,7 +18,7 @@ export class DataSourceService extends DataSource {
   constructor(dbOptions: DataSourceOptions) {
     super(dbOptions);
     // eslint-disable-next-line no-console
-    console.log(dbOptions);
+    // console.log(dbOptions);
   }
 
   // FIXME: melhorar tratamento de erros

@@ -8,8 +8,9 @@ import morgan from 'morgan';
 import requestIp from 'request-ip';
 
 import type { LoggerService } from '#/services/LoggerService';
+import type { QueueService } from '#/services/QueueService';
+import { tryRedisConnection } from '#/services/QueueService/afterRedisConnect';
 import type { SocketServerService } from '#/services/SocketServerService';
-import { queues } from '#/useCases/index.job';
 import { IndexRoute } from '#/useCases/index.route';
 
 import { errorMiddleware } from './error.middleware';
@@ -28,7 +29,12 @@ export class AppExpress {
   private readonly server: Server;
   private started: boolean;
 
-  constructor({ port, env }: IAppOptions, private readonly socketServerService: SocketServerService, private readonly loggerService?: LoggerService) {
+  constructor(
+    { port, env }: IAppOptions,
+    private readonly socketServerService: SocketServerService,
+    private readonly loggerService?: LoggerService,
+    private readonly queues: QueueService[] = [],
+  ) {
     this.port = port;
     this.env = env;
     this.express = express();
@@ -59,13 +65,29 @@ export class AppExpress {
     this.express.use(errorMiddleware);
   }
 
+  // private async startQueues() {
+  //   // return Promise.all(queues.map(queue => queue?.process()));
+  //   queues.map(queue => queue?.process());
+  // }
   private async startQueues() {
-    // return Promise.all(queues.map(queue => queue?.process()));
-    queues.map(queue => queue?.process());
+    return new Promise<boolean>(async resolve => {
+      const redis = this?.queues?.find(f => !!f.queue.client)?.queue?.client;
+
+      const { success, message } = await tryRedisConnection(redis, {}, this?.loggerService);
+      if (success) {
+        this?.queues?.map(queue => {
+          queue?.process();
+          resolve(true);
+        });
+      } else {
+        this.loggerService.logError(`Server HTTP startQueues,`, message, redis?.options?.host);
+        resolve(false);
+      }
+    });
   }
 
   public async close() {
-    return Promise.all(queues.map(queue => queue?.destroy()));
+    return Promise.all(this?.queues.map(queue => queue?.destroy()));
   }
 
   async start() {

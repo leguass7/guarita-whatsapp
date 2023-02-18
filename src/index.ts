@@ -1,10 +1,11 @@
 import { AppExpress } from './app/AppExpress';
 import { httpPort, nodeEnv } from './config';
 import { dataSource } from './database';
+import { queues } from './useCases/index.job';
 import { loggerService } from './useCases/logger.service';
 import { socketServerService } from './useCases/socket.service';
 
-const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv }, socketServerService, loggerService);
+const serverHttp = new AppExpress({ port: httpPort, env: nodeEnv }, socketServerService, loggerService, queues);
 
 export async function startServer() {
   await dataSource.initialize();
