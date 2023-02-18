@@ -60,8 +60,6 @@ const sendGeneralEmailJobSg = (mailService: EmailService): IJob<JobNames, SendGe
     async handle({ data }) {
       const { email: to, text, subject = 'SEM ASSUNTO' } = data;
 
-      throw new Error('error_test');
-
       const response = await mailService.send({ to, html: text, subject: `${subject}${isDevMode ? ' (TESTE)' : ''}` });
       return response as EmailServiceResponseDto;
     },
