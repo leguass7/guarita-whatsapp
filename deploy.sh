@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# docker system prune --all --force --volumes
+
 docker-compose -f "docker-compose.yml" down --volumes
 
 git pull

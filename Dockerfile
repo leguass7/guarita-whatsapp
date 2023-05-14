@@ -6,7 +6,7 @@ WORKDIR /usr/app
 COPY . .
 
 # RUN yarn install --frozen-lockfile --production
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 RUN yarn build:heap
 
