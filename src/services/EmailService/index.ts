@@ -22,7 +22,11 @@ export class EmailService {
   public sender: EmailServiceSender;
 
   constructor(private provider: MailServiceProvider = 'smtp', private readonly loggerService: LoggerService) {
-    if (provider === 'sendgrid' && !sendgridConfig?.key) throw new Error('invalid_sendgrid_config');
+    if (provider === 'sendgrid' && !sendgridConfig?.key) {
+      console.log('sendgrid_key_not_found', 'SENDGRID_KEY', sendgridConfig?.key);
+      throw new Error('invalid_sendgrid_config');
+    }
+
     if (provider === 'smtp') {
       if (!smtpConfig?.auth?.user || !smtpConfig?.auth?.pass || !smtpConfig?.host) {
         throw new Error(`invalid_smtp_config`);
