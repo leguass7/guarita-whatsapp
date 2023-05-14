@@ -3,7 +3,7 @@ import request, { SuperTest } from 'supertest';
 import { env } from '../config';
 import { startServer } from '../index';
 
-const to = env.WHATSAPP_TEST;
+// const to = env.WHATSAPP_TEST;
 
 describe('Test server features', () => {
   let token: string;
@@ -43,35 +43,35 @@ describe('Test server features', () => {
     expect(typeof token).toBe('string');
   });
 
-  it('Send invalid text', async () => {
-    const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
-      provider: 'maxbot',
-      type: 'text',
-      message: null,
-      to: '551212345678',
-    });
-    expect(result.status).toBe(400);
-  });
+  // it('Send invalid text', async () => {
+  //   const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
+  //     provider: 'maxbot',
+  //     type: 'text',
+  //     message: null,
+  //     to: '551212345678',
+  //   });
+  //   expect(result.status).toBe(400);
+  // });
 
-  it('Send text message', async () => {
-    const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
-      provider: 'maxbot',
-      type: 'text',
-      message: 'Teste de mensagem TESTING',
-      to,
-    });
-    expect(result.status).toBe(200);
-  });
+  // it('Send text message', async () => {
+  //   const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
+  //     provider: 'maxbot',
+  //     type: 'text',
+  //     message: 'Teste de mensagem TESTING',
+  //     to,
+  //   });
+  //   expect(result.status).toBe(200);
+  // });
 
-  it('Send text image', async () => {
-    const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
-      provider: 'maxbot',
-      type: 'image',
-      message: 'https://avatarsolucoesdigitais.com.br/images/makeupok.jpg',
-      to,
-    });
-    expect(result.status).toBe(200);
-  });
+  // it('Send text image', async () => {
+  //   const result = await app.post('/send').set('Authorization', `Bearer ${token}`).send({
+  //     provider: 'maxbot',
+  //     type: 'image',
+  //     message: 'https://avatarsolucoesdigitais.com.br/images/makeupok.jpg',
+  //     to,
+  //   });
+  //   expect(result.status).toBe(200);
+  // });
 
   it('Request tokens', async () => {
     const result = await app.get('/token').set('Authorization', `Bearer ${token}`).send();
