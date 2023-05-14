@@ -23,7 +23,7 @@ export class EmailService {
 
   constructor(private provider: MailServiceProvider = 'smtp', private readonly loggerService: LoggerService) {
     if (provider === 'sendgrid' && !sendgridConfig?.key) {
-      console.log('sendgrid_key_not_found', 'SENDGRID_KEY', sendgridConfig?.key);
+      // console.log('sendgrid_key_not_found', 'SENDGRID_KEY', sendgridConfig?.key);
       throw new Error('invalid_sendgrid_config');
     }
 
