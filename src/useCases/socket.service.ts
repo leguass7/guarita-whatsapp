@@ -8,6 +8,7 @@ import { SocketStatusRoute } from '#socket/status/status.socket';
 import { loggerService } from './logger.service';
 
 const socketServerService = new SocketServerService(loggerService);
+
 socketServerService.on('onDisconnect', disconnectHandler);
 socketServerService.on('onConnect', connectHandler);
 
