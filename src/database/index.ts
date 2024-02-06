@@ -17,7 +17,6 @@ export const dataSource = new DataSourceService({
   // charset: 'utf8mb4_unicode_ci',
   synchronize: false,
   // synchronize: true,
-  // synchronize: false,
   entities,
   logging: ['error'],
   // logging: ['error', 'query'],
