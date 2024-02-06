@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      redis: 
+      redis:
         image: redis:alpine
         ports:
           - 6379:6379
@@ -46,12 +46,12 @@ jobs:
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
             sleep 1
-          done  
+          done
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 20
           cache: yarn
 
       - name: 📦 Install dependencies
@@ -59,7 +59,6 @@ jobs:
 
       - name: 🚔 Test Lint
         run: yarn lint
-
 
       - name: 🚀 Test App
         run: yarn test
@@ -74,7 +73,7 @@ jobs:
           DB_PASSWORD: password
           MAXBOT_KEY: ${{secrets.MAXBOT_KEY}}
           WHATSAPP_TEST: ${{secrets.WHATSAPP_TEST}}
-          TEXT_MESSAGE_TEST: ${{github.event.number}}
+          TEXT_MESSAGE_TEST: ${{ github.event.number }}
 
           MAIL_FROM: Atendimento <atendimento01@dessistemas.com.br>
           SMTP_HOST: ${{secrets.SMTP_HOST}}
