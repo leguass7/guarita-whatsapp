@@ -9,7 +9,7 @@ import { entities } from './entities';
 const config: MysqlConnectionOptions = {
   ...dbConfig,
   connectTimeout: 60 * 60 * 1000,
-  acquireTimeout: 60 * 60 * 1000,
+  // acquireTimeout: 60 * 60 * 1000,
 };
 
 export const dataSource = new DataSourceService({
