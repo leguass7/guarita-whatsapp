@@ -10,7 +10,7 @@ services:
     ports:
       - ${PORT}:${PORT}
     volumes:
-      - node_modules_cache:/usr/app/node_modules
+      # - node_modules_cache:/usr/app/node_modules
       - ./volumes:/usr/app/volumes
     environment:
       VIRTUAL_HOST: ${LETSENCRYPT_HOST}
@@ -28,9 +28,8 @@ services:
       resources:
         limits:
           memory: 400M
-volumes:
-  node_modules_cache:
-
+# volumes:
+#   node_modules_cache:
 
 networks:
   default:
