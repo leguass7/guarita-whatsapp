@@ -82,7 +82,7 @@ jobs:
           DB_PASSWORD: password
           MAXBOT_KEY: ${{secrets.MAXBOT_KEY}}
           WHATSAPP_TEST: ${{secrets.WHATSAPP_TEST}}
-          TEXT_MESSAGE_TEST: ${{ github.event.number }}
+          TEXT_MESSAGE_TEST: 'TESTE MENSAGEM ${{ github.event.number }}: ${{github.event.head_commit.message}}'
 
           MAIL_FROM: Atendimento <atendimento01@dessistemas.com.br>
           SMTP_HOST: ${{secrets.SMTP_HOST}}
