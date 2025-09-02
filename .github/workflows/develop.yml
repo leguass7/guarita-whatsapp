@@ -1,6 +1,14 @@
 name: Test App
 
 on:
+  pull_request:
+    types: [opened, synchronize]
+    paths-ignore:
+      - '.vscode/**'
+      - 'docs/**'
+      - '**/*.md'
+      - 'volumes/**'
+      - '.env.example'
   push:
     branches:
       - develop
@@ -12,8 +20,8 @@ on:
       - '.env.example'
 
 jobs:
-  if: contains(github.event.head_commit.message , 'docs:') == false
   tests:
+    if: contains(github.event.head_commit.message , 'docs:') == false
     runs-on: ubuntu-latest
 
     services:
