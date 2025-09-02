@@ -1,4 +1,4 @@
-import request, { SuperTest } from 'supertest';
+import request, { type SuperTest } from 'supertest';
 
 import { env } from '../config';
 import { startServer } from '../index';

@@ -1,4 +1,4 @@
-import Maxbot, { MaxbotOptions } from 'maxbotjs';
+import Maxbot, { type MaxbotOptions } from 'maxbotjs';
 
 import { LogClass } from '../LoggerService/log-class.decorator';
 export * from 'maxbotjs';

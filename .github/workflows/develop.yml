@@ -66,8 +66,6 @@ jobs:
       - name: 😬 Test Build
         run: yarn build
 
-      - name: 😬 Test Build
-        run: yarn build
       - name: 🚀 Test App
         run: yarn test
 

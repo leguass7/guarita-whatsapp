@@ -1,4 +1,4 @@
-import { ApiResult } from 'maxbotjs';
+import type { ApiResult } from 'maxbotjs';
 
 export class MaxbotException extends TypeError {
   message: string;

@@ -5,7 +5,7 @@ on:
     workflows: [Test App]
     types:
       - completed
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -20,12 +20,11 @@ jobs:
           username: ${{secrets.SSH_USER}}
           key: ${{secrets.SSH_PRIVATE_KEY}}
           port: 22
-          script_stop: true
-          #script: cd ./guarita-whatsapp && bash deploy.sh    
-          script: | 
+          #script: cd ./guarita-whatsapp && bash deploy.sh
+          script: |
             cd ./guarita-whatsapp 
-            bash deploy.sh    
-      
+            bash deploy.sh
+
 # on:
 #   push:
 #     branches:
@@ -60,7 +59,7 @@ jobs:
 
 #       - name: 😬 Test Build
 #         run: yarn build
-      
+
 #       - name: 😬 Executing remote ssh commands using ssh key
 #         uses: appleboy/ssh-action@master
 #         with:
