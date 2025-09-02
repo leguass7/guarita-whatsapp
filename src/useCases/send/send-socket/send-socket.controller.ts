@@ -12,8 +12,10 @@ import type { SendSocketService } from './send-socket.service';
 export class SendSocketController {
   constructor(private readonly sendSocketService: SendSocketService, private readonly sendEmailService: SendEmailService) {}
 
-  async sendMessage(req: Request, res: Response, _next: NextFunction) {
-    const { to, text, metaData } = req.body as RequestSendSocketTextDto;
+  async sendMessage(req: Request<any, any, RequestSendSocketTextDto>, res: Response, _next: NextFunction) {
+    const { body } = req;
+    const { to, text, metaData } = body;
+    console.log('SendSocketController sendMessage body', JSON.stringify(body, null, 4));
     loggerService.logging('sendMessage metaData', metaData?.userName, metaData?.email);
     const response = await this.sendSocketService.sendScheduledText({ to, text });
 
