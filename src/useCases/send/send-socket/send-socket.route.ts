@@ -10,6 +10,7 @@ import { socketServerService } from '#/useCases/socket.service';
 import { SendSocketController } from './send-socket.controller';
 import { sendSocketQueueOptions, createSendSocketJob } from './send-socket.job';
 import { SendSocketService } from './send-socket.service';
+import { sendSocketSchema } from './send-socket.validation';
 
 const sendSocketJob = createSendSocketJob(socketServerService);
 
@@ -19,7 +20,7 @@ const sendSocketService = new SendSocketService(loggerService, socketServerServi
 const controller = new SendSocketController(sendSocketService, sendEmailService);
 const SendSocketRoute = Router();
 
-SendSocketRoute.post('/message', (req, res, next) => controller.sendMessage(req, res, next));
+SendSocketRoute.post('/message', sendSocketSchema, (req, res, next) => controller.sendMessage(req, res, next));
 SendSocketRoute.post('/text', (req, res, next) => controller.sendText(req, res, next));
 SendSocketRoute.get('/status', (req, res, next) => controller.getStatus(req, res, next));
 

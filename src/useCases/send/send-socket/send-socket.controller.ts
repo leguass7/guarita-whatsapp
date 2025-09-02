@@ -15,7 +15,6 @@ export class SendSocketController {
   async sendMessage(req: Request<any, any, RequestSendSocketTextDto>, res: Response, _next: NextFunction) {
     const { body } = req;
     const { to, text, metaData } = body;
-    console.log('SendSocketController sendMessage body', JSON.stringify(body, null, 4));
     loggerService.logging('sendMessage metaData', metaData?.userName, metaData?.email);
     const response = await this.sendSocketService.sendScheduledText({ to, text });
 

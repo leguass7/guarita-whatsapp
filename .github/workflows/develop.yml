@@ -12,61 +12,62 @@ on:
       - '.env.example'
 
 jobs:
+  if: contains(github.event.head_commit.message , 'docs:') == false
   tests:
     runs-on: ubuntu-latest
 
     services:
       redis:
-        image: redis:alpine
-        ports:
-          - 6379:6379
+        image: redis
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
+
       mariadb:
         image: mariadb:latest
         env:
-          MYSQL_DATABASE: guarita-whatsapp
-          MYSQL_USER: guarita-whatsapp
-          MYSQL_PASSWORD: password
-          MYSQL_ROOT_PASSWORD: rootpassword
+          MARIADB_ROOT_PASSWORD: rootpassword
+          MARIADB_DATABASE: guarita-whatsapp
+          MARIADB_USER: guarita-whatsapp
+          MARIADB_PASSWORD: password
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: 🏗 Setup repo
-        uses: actions/checkout@v2
-
-      - name: ⏲️ Verify MariaDB connection
-        env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
-        run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
-            sleep 1
-          done
+      - name: user name
+        run: 'echo ${{github.actor}}'
+      - name: ⚙️ Setup repo
+        uses: actions/checkout@v4
 
       - name: 🏗 Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: yarn
-
       - name: 📦 Install dependencies
-        run: yarn --frozen-lockfile --ignore-opcional
+        run: yarn --frozen-lockfile --ignore-optional
 
       - name: 🚔 Test Lint
         run: yarn lint
 
+      - name: 😬 Test Build
+        run: yarn build
+
+      - name: 😬 Test Build
+        run: yarn build
       - name: 🚀 Test App
         run: yarn test
+
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           DB_TYPE: mysql
-          DB_HOST: 127.0.0.1
+          DB_HOST: localhost
           DB_PORT: ${{job.services.mariadb.ports[3306]}}
           DB_DATABASE: guarita-whatsapp
           DB_USERNAME: guarita-whatsapp
@@ -81,6 +82,3 @@ jobs:
           SMTP_USER: ${{secrets.SMTP_USER}}
           SMTP_PASS: ${{secrets.SMTP_PASS}}
           SMTP_SECURE: 1
-
-      - name: 😬 Test Build
-        run: yarn build
