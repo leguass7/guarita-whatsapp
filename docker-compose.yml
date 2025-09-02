@@ -1,12 +1,13 @@
-version: '3'
-
 services:
   app:
     env_file:
       - .env
     restart: always
     container_name: guarita-whatsapp-prod
-    build: .
+
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - ${PORT}:${PORT}
     volumes:

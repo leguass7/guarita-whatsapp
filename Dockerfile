@@ -4,8 +4,6 @@ WORKDIR /usr/app
 
 COPY . .
 
-ENV DOCKER_BUILDKIT=1
-
 # RUN yarn install --frozen-lockfile --production
 # RUN yarn install --frozen-lockfile
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn/v6,sharing=locked yarn --frozen-lockfile --ignore-opcional --ignore-engines
