@@ -183,7 +183,7 @@ export class SocketServerService {
     const client = this.first();
     if (!client) return result;
 
-    const execute = () =>
+    const execute = async () =>
       new Promise<ISocketClientResponse>(resolve => {
         client.socket.emit('status', { uid }, async response => {
           resolve({ ...result, ...response });
