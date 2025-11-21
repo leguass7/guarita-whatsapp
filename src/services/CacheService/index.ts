@@ -21,7 +21,10 @@ export class CacheService {
     const has = this.hasKey(key);
     const count = has ? Number(this.get<number>(key)) + 1 : 1;
     this.set(key, count, 6200);
-    return count;
+    
+    // FIXME: Prioridade fixa para resolver problema de síndicos com múltiplos condomínios
+    // Todos os envios terão a mesma prioridade, garantindo processamento FIFO
+    return 1;
   }
 
   public getHashKey(to: string, data: any): string {
