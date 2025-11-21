@@ -1,6 +1,4 @@
 # redis para ambiente de desenvolvimento
-version: '3'
-
 services:
   cache:
     env_file:

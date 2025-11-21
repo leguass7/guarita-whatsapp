@@ -41,7 +41,10 @@ export class SendService {
       count = Number(this.cacheService.get<number>(key)) + 1;
     }
     this.cacheService.set(key, count, 6200);
-    return count;
+
+    // FIXME: Prioridade fixa para resolver problema de síndicos com múltiplos condomínios
+    // Todos os envios terão a mesma prioridade, garantindo processamento FIFO
+    return 1;
   }
 
   private processFailed(data: CreateSendLog, log?: LogCallback): FailedPromiseCallback<SendMaxbotPayload, string> {
